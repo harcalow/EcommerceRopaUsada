@@ -1,0 +1,8 @@
+# Trazas y estado local de los hooks de agentes
+logs/
+__pycache__/
+
+# Secretos (solo se versiona .env.example)
+.env
+.env.*
+!.env.example
