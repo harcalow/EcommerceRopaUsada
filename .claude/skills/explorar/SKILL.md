@@ -11,5 +11,5 @@ Funcionalidad: $ARGUMENTS
 2. Delega en el subagente `explorador`. Pásale la descripción y `NNN`, y pídele el contenido de `contexto.md`. No explores tú mismo: así tu contexto queda limpio.
 3. Con su salida, crea `specs/features/NNN-nombre/contexto.md` a partir de `specs/_plantillas/contexto.md`.
 4. Añade la funcionalidad a `specs/features/README.md`.
-5. Muestra el resumen al usuario. Si faltan capas horizontales previas, destácalo.
+5. Muestra el resumen al usuario. Si falta base técnica, destácalo: irá en el diseño de esta funcionalidad.
 6. DETENTE. No requiere aprobación. El siguiente paso es `/especificar NNN`.

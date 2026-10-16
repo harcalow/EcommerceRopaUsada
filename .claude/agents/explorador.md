@@ -18,15 +18,15 @@ skills:
 1. Engram: `mem_search` con los términos de la funcionalidad.
 2. Lee `specs/00-vision/` (visión, roadmap, glosario), los ADR relacionados, `specs/02-memoria/` (aprendizajes y registro de componentes) y las specs de funcionalidades relacionadas.
 3. Localiza el código relevante con `Grep` y `Glob`. Lee solo los rangos necesarios.
-4. Clasifica la funcionalidad como horizontal o vertical (skill `estrategia-entrega`) y detecta las capas horizontales previas que falten.
+4. Detecta la base técnica que falte para esta funcionalidad (skill `estrategia-entrega`); irá en su propio diseño, nunca como spec aparte.
 5. Si el orquestador lo pide, redacta el contenido de `contexto.md` en tu salida; quien lo escribe es el orquestador.
 
 ## Formato de salida
 El del `protocolo-subagente`, más una sección:
 ```markdown
 ## Contexto
-- Tipo: horizontal | vertical — <justificación>
+- Tipo: vertical (una funcionalidad por requerimiento del dueño, ADR-010)
 - Existente reutilizable: <componente — ruta>
-- Capas horizontales previas requeridas: <lista | ninguna>
+- Base técnica que falta y que irá en su diseño: <lista | ninguna>
 - Riesgos y dudas: <lista>
 ```

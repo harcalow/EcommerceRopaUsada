@@ -4,7 +4,7 @@ estado: borrador
 
 # Stack tecnológico
 
-> Derivado de ADR-001, ADR-002 y ADR-003. Se considera vigente cuando esos ADR estén `aceptada`.
+> Derivado de ADR-001 a ADR-009. Cómo se usa cada pieza en el proyecto: `specs/features/001-login-administrador/diseno.md` (base técnica, ADR-010).
 
 | Capa | Tecnología | ADR |
 |------|------------|-----|

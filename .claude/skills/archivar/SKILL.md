@@ -18,7 +18,7 @@ Funcionalidad: $ARGUMENTS
    - Los estados `cumplida` y `completada`.
    - Los índices y el roadmap.
    - Si es una **rebanada vertical**: la revisión y limpieza de la memoria obsoleta.
-3. Si es una **capa horizontal**: revisa los MCP y plugins habilitados (ADR-004) y propón retirar los que ya no se usen.
+3. Si la funcionalidad incluyó base técnica: revisa los MCP y plugins habilitados (ADR-004) y propón retirar los que ya no se usen.
 4. Si surgieron convenciones nuevas: propón crear o actualizar la skill correspondiente y su referencia en `CLAUDE.md` (no lo apliques sin confirmación).
 5. Propón abrir el PR de la rama `feature/<NNN>-*`: una rama y un PR por rebanada. Usa el MCP de GitHub solo con autorización.
 6. Guarda el cierre con `mem_session_summary`.

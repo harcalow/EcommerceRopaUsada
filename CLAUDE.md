@@ -33,8 +33,9 @@ El detalle vive en las skills (se cargan bajo demanda), en los ADR (`specs/01-ar
 - ADR: `propuesta` → `aceptada` (solo el humano).
 
 **Entrega** (skill `estrategia-entrega`):
-- Primero las capas horizontales (base transversal); luego las rebanadas verticales de 1 a 3 días, de punta a punta y por valor y riesgo.
-- Una rebanada no crea infraestructura.
+- **Una carpeta de funcionalidad por requerimiento del dueño.** No se crean specs adicionales (horizontales ni de apoyo) que el dueño no pidió (ADR-010).
+- La base técnica que una funcionalidad necesita y aún no existe va en su propio `diseno.md` (requisitos RT) y en sus primeras tareas; la siguiente funcionalidad la reutiliza.
+- Funcionalidades de punta a punta, ordenadas por valor y riesgo.
 - Orden vigente: `specs/00-vision/roadmap.md`.
 
 ## Equipo de agentes (ADR-005)
@@ -149,14 +150,14 @@ specs/
 ## Estado actual
 
 - Stack, entorno, equipo y requisitos por plataforma propuestos en ADR-001 a ADR-006, pendientes de aceptación.
-- Capa horizontal `000-estructura-monorepo` pendiente de aprobación. Visión de producto pendiente.
+- Única funcionalidad: `001-login-administrador` (spec y diseño aprobados, incluye la base técnica; siguiente paso `/implementar 001`). Visión de producto pendiente.
 - **Comandos**, siempre desde la raíz, con pnpm 10 y Node 24:
 
   | Comando | Qué hace |
   |---------|----------|
   | `pnpm infra:up` / `pnpm infra:down` | Levanta o para la infraestructura (Docker) |
   | `docker compose --profile apps up -d` | Levanta además la api y la web |
-  | `pnpm dev`, `pnpm build`, `pnpm test`, `pnpm lint`, `pnpm typecheck`, `pnpm format` | Vía Turborepo; operativos cuando la 002 genere las apps |
+  | `pnpm dev`, `pnpm build`, `pnpm test`, `pnpm lint`, `pnpm typecheck`, `pnpm format` | Vía Turborepo; operativos tras las tareas de base de la 001 (T-01 en adelante) |
 - Requisitos del entorno:
   - Instalado: Python 3.
   - Pendientes: Node.js 24 LTS, Docker Desktop, Engram, `typescript-language-server` y la variable `GITHUB_PERSONAL_ACCESS_TOKEN`.

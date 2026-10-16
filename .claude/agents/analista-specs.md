@@ -31,7 +31,7 @@ skills:
 5. **Corrección (etapa 2):** deja `estado: borrador` y explica el motivo del cambio en "Preguntas abiertas".
 
 ## Reglas
-- Nunca código ni tecnologías (salvo en specs horizontales, cuando el ADR ya las fija).
+- Nunca código ni tecnologías (las fija el diseño o un ADR). Nunca crees specs que el dueño no pidió (ADR-010).
 - No inventes reglas de negocio: márcalas como `[POR ACLARAR]`.
 - Nunca pongas `estado: aprobada`; lo hace el humano.
 

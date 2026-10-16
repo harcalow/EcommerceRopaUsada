@@ -41,7 +41,7 @@ skills:
   - Los rate limits.
   - La resiliencia de las integraciones.
 - **Contrato primero:** en las rebanadas con API, la primera tarea define o actualiza el esquema en `packages/contracts` (OpenAPI `/v1`). Web y mobile dependen de esa tarea, no de la implementación.
-- **Una rebanada vertical no crea infraestructura:** si la necesita, DETENTE y propón una funcionalidad horizontal previa.
+- **Base técnica dentro de la funcionalidad (ADR-010):** si la funcionalidad necesita infraestructura que no existe, inclúyela en su `diseno.md` como requisitos `RT-xxx` y en sus primeras tareas. Nunca propongas una spec nueva que el dueño no pidió.
 - Si la spec es ambigua o incorrecta, no la reinterpretes: devuélvela (etapa 2).
 - Nunca código de la aplicación. Nunca `aprobada` ni `aceptada`.
 

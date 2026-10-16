@@ -14,3 +14,4 @@ Los ADR no se editan una vez aceptados; si una decisión cambia, se crea un ADR 
 | [ADR-007](ADR-007-sesion-y-hash-de-contrasenas.md) | Sesión en servidor con cookie opaca y hash argon2id | aceptada |
 | [ADR-008](ADR-008-herramientas-transversales-api-y-ci.md) | Herramientas transversales de API, pruebas y CI | aceptada |
 | [ADR-009](ADR-009-design-system-web.md) | Design system web: tokens, estilos, componentes y pruebas de accesibilidad | aceptada |
+| [ADR-010](ADR-010-base-tecnica-en-la-primera-funcionalidad.md) | La base técnica se entrega dentro de la primera funcionalidad | aceptada |

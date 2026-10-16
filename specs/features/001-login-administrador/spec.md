@@ -3,10 +3,10 @@ id: 001
 titulo: Login de administrador
 tipo: vertical        # horizontal (base técnica) | vertical (valor para el usuario)
 estado: aprobada      # borrador → aprobada (solo tú) → cumplida
-aprobacion: dueño (Harold) el 2026-10-15, aplicada por el orquestador con su autorización explícita en el chat
+aprobacion: dueño (Harold) el 2026-10-15; reaprobada el mismo día tras quitar las referencias a 000 y 002 (sin cambios de RF, CA, CB ni RNF)
 autor: analista-specs
 plataforma: web       # panel de administración solo en la web (responsive)
-depende_de: [000, 002]
+depende_de: []
 ---
 
 # Spec 001 — Login de administrador
@@ -278,6 +278,7 @@ Se recomienda cambiarla antes de salir a producción.
 
 ## Preguntas abiertas
 - [POR ACLARAR] Dirección de correo del responsable de la tienda (RF-007). Es configurable, así que no bloquea la implementación, pero hace falta su valor para producción.
+- **Motivo de la vuelta a `borrador` (2026-10-15):** solo se corrigieron las referencias a las funcionalidades 000 y 002, fusionadas en esta (ADR-010): `depende_de` queda vacío y la nota de dependencias remite a `diseno.md` (RT-001..RT-021). No cambia ningún RF, CA, CB ni RNF. Reaprobada por el dueño el mismo día.
 
 ## Decisiones tomadas
 **14-10-2026 (dueño):**
@@ -298,4 +299,4 @@ Se recomienda cambiarla antes de salir a producción.
 - Rendimiento del login: ≤ 1 s (p95).
 - **El rol se guarda en la base de datos** (RF-023). `HaroldAdmin`, con rol administrador, es de momento la única cuenta y la única que puede iniciar sesión (RF-019).
 - La contraseña inicial la compartió el dueño en el chat. Como quedó escrita fuera de un gestor de secretos, **debe cambiarse antes de salir a producción**.
-- Depende de las capas horizontales **000** (estructura y Docker) y **002** (fundaciones: apps, base de datos, errores, sesiones y tokens de marca).
+- No depende de otras funcionalidades: la base técnica necesaria (estructura, Docker, apps, base de datos, errores, sesiones y tokens de marca) está en el diseño de esta misma funcionalidad (`diseno.md`, RT-001..RT-021; ver ADR-010).

@@ -1,48 +1,38 @@
 ---
 name: estrategia-entrega
-description: Estrategia de entrega del proyecto, capas horizontales (base transversal) y rebanadas verticales (valor de punta a punta). Úsalo al clasificar, dimensionar, priorizar o diseñar una funcionalidad.
+description: Estrategia de entrega del proyecto (ADR-010), una carpeta de funcionalidad por requerimiento del dueño, con la base técnica que necesite dentro de su propio diseño. Úsalo al clasificar, dimensionar, priorizar o diseñar una funcionalidad.
 user-invocable: false
 ---
 
-# Estrategia de entrega: capas horizontales + rebanadas verticales
+# Estrategia de entrega: una funcionalidad por requerimiento (ADR-010)
 
-## Capas horizontales (la base, primero)
-Elementos transversales que se construyen **una vez** y que usan todas las funcionalidades:
-- Configuración y estructura del proyecto.
-- CI y hooks.
-- Autenticación.
+## Regla de oro
+**Solo existen las funcionalidades que el dueño pidió.** Cada requerimiento es una carpeta `specs/features/NNN-nombre/`. No se crean specs adicionales (capas horizontales, «fundaciones», specs de apoyo) sin que el dueño lo pida.
+
+## Base técnica
+Elementos transversales que se construyen **una vez** y que reutilizan las funcionalidades siguientes:
+- Configuración y estructura del proyecto, CI y hooks.
+- Autenticación y sesión.
 - Manejo de errores y logging.
 - Cliente de base de datos y migraciones.
 - Design system o librería de componentes base (web y mobile).
 - Utilidades compartidas (`Money`, validación, paginación…).
 - Integraciones con puerto propio: almacenamiento de imágenes y pasarela de pagos (ADR-002).
 
-Una capa horizontal se especifica con `tipo: horizontal`. No necesita historia de usuario final, pero sí criterios de aceptación verificables.
+Si una funcionalidad necesita algo transversal que no existe:
+1. El `arquitecto` lo incluye en el `diseno.md` de esa misma funcionalidad como requisito técnico (`RT-xxx`), con su verificación y su origen (RNF de la spec, ADR o Definition of Done).
+2. `tasks.md` lo construye en los primeros hitos, antes de las tareas de valor.
+3. La spec no cambia por ello: la base técnica es «cómo», no «qué».
+4. Las funcionalidades siguientes la reutilizan; el `revisor` comprueba en `/verificar` que no se duplique.
 
-## Rebanadas verticales (el valor, después)
-- Cada historia de usuario se entrega **de punta a punta**: UI (web y/o mobile) → lógica → API → datos → pruebas.
+## Funcionalidades
+- Cada requerimiento se entrega **de punta a punta**: UI (web y/o mobile) → lógica → API → datos → pruebas.
 - Al terminar, queda **demostrable y desplegable**.
-- **Tamaño:** de 1 a 3 días de trabajo humano equivalente. Si es mayor, se divide (por ejemplo, el camino feliz en una rebanada y los casos borde en otra).
-- Cada rebanada tiene su propia spec SDD con `tipo: vertical`.
-
-## Regla de oro
-**Una rebanada vertical no crea infraestructura nueva.** Si necesita algo transversal que no existe:
-1. Se detiene el diseño de la rebanada.
-2. Se crea (o amplía) la funcionalidad horizontal correspondiente y se completa.
-3. Se retoma la rebanada.
-
-El `arquitecto` lo detecta en `/disenar` y el `revisor` lo comprueba en `/verificar`.
+- Si es grande, se divide en **hitos** dentro de su `tasks.md` (un PR por hito), no en specs nuevas.
 
 ## Priorización
-1. Las capas horizontales que bloquean la primera rebanada.
-2. Las rebanadas por **valor y riesgo**: primero el camino feliz más importante del negocio, después los casos borde.
+1. Lo que el dueño pidió primero, salvo que él indique otro orden.
+2. Dentro de una funcionalidad: la base técnica que la bloquea, luego el camino feliz, después los casos borde.
 3. El riesgo técnico alto (p. ej. la concurrencia sobre prendas únicas) se ataca pronto para aprender barato.
 
 El orden vigente vive en `specs/00-vision/roadmap.md`.
-
-## Cómo distinguirlas
-| Pregunta | Horizontal | Vertical |
-|----------|------------|----------|
-| ¿La percibe el usuario final? | No directamente | Sí |
-| ¿La reutilizan varias funcionalidades? | Sí | No |
-| ¿Se demuestra con una historia de usuario? | No | Sí |

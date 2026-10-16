@@ -62,7 +62,7 @@ Etapas: `base` (node:24-alpine, pnpm vía corepack) → `pruned` (`turbo prune <
 - `prod`: usuario `node`, `NODE_ENV=production`, solo artefactos necesarios, `HEALTHCHECK`.
 - La web necesita `output: 'standalone'` en `next.config` para `prod`.
 - `.dockerignore` excluye `node_modules`, `dist`, `.next`, `.turbo`, entorno (salvo el ejemplo), `.git`, `specs`, `.claude`.
-- Estado: plantillas sin probar; se validan al generar las apps (spec 002).
+- Estado: plantillas sin probar; se validan al generar las apps (base técnica de la 001).
 
 ```dockerfile
 # ❌ imagen sin fijar, root, copia todo
