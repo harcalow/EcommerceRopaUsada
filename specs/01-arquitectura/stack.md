@@ -18,7 +18,11 @@ estado: borrador
 | Estado en clientes | TanStack Query + Zustand | ADR-001 |
 | Almacenamiento de imágenes | API S3 (emulador en local; proveedor real por definir) | ADR-003 |
 | Pagos | Puerto `PaymentGateway`; primer adaptador: Mercado Pago | ADR-002 |
-| Autenticación | [POR ACLARAR] | — |
-| Testing | Vitest/Jest (unitarias), pruebas de contrato, Playwright (E2E web y visual), Maestro (E2E móvil, a confirmar) | ADR-001, ADR-006 |
+| Autenticación | Sesión en servidor (PostgreSQL) con cookie opaca HttpOnly + CSRF sincronizador; hash argon2id (`@node-rs/argon2`) — propuesta | ADR-007 |
+| Logging, configuración y límite de peticiones | pino (`nestjs-pino`), configuración validada con Zod, `@nestjs/throttler` con almacén PostgreSQL — propuesta | ADR-008 |
+| Generación de contrato y cliente | `@asteasolutions/zod-to-openapi` → `openapi-typescript` + `openapi-fetch` — propuesta | ADR-008 |
+| Design system web | `@perchados/ui-tokens` (TS → variables CSS) + `@perchados/ui-web` (CSS Modules, HTML nativo); Plus Jakarta Sans + IBM Plex Mono — propuesta | ADR-009 |
+| Testing | Vitest en todo el monorepo (unitarias, integración y contrato con Ajv), axe (vitest-axe, @axe-core/playwright), Playwright (E2E web), Maestro (E2E móvil, a confirmar) | ADR-001, ADR-006, ADR-008, ADR-009 |
+| CI | GitHub Actions; gitleaks y `pnpm audit` — propuesta | ADR-008 |
 | Contenedores | Docker Compose (dev) + Dockerfiles multi-stage (prod) | ADR-003 |
 | Despliegue | [POR ACLARAR] — cualquier hosting de contenedores | ADR-003 |

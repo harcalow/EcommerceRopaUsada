@@ -7,6 +7,8 @@ skills:
   - protocolo-subagente
   - memoria-engram
   - requisitos-plataforma
+  - nestjs-hexagonal
+  - docker-dev
 ---
 
 **Objetivo:** convertir una tarea aprobada en código backend probado, limpio y alineado con el diseño.

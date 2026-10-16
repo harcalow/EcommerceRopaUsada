@@ -10,13 +10,13 @@ Leyenda: `[ ]` pendiente · `[~]` en curso · `[x]` hecha
 
 | ID | Tarea | Agente | Cubre | Depende de | Estado |
 |----|-------|--------|-------|------------|--------|
-| T-01 | Archivos raíz del monorepo | backend-dev | RF-001, RF-006, CB-003 | — | [ ] |
-| T-02 | Estructura de `apps/api` + módulo `payments` + skill `nestjs-hexagonal` | backend-dev | RF-002, RF-003 | T-01 | [ ] |
-| T-03 | Estructura de `apps/web` + skill `nextjs-app-router` | frontend-dev | RF-002 | T-01 | [ ] |
-| T-04 | Estructura de `apps/mobile` + skill `expo-router-mvvm` | frontend-dev | RF-002 | T-01 | [ ] |
-| T-05 | `packages/*` con README de propósito | backend-dev | RF-001 | T-01 | [ ] |
-| T-06 | Docker: compose, Dockerfiles, `.dockerignore` + skill `docker-dev` | backend-dev | RF-004, RF-005, RF-006, CB-001, CB-002, CB-004 | T-02, T-03 | [ ] |
-| T-07 | Actualizar `CLAUDE.md` raíz (estructura, referencias a skills, comandos) | orquestador | RF-002 | T-01…T-06 | [ ] |
+| T-01 | Archivos raíz del monorepo | backend-dev | RF-001, RF-006, CB-003 | — | [x] |
+| T-02 | Estructura de `apps/api` + módulo `payments` + skill `nestjs-hexagonal` | backend-dev | RF-002, RF-003 | T-01 | [x] |
+| T-03 | Estructura de `apps/web` + skill `nextjs-app-router` | frontend-dev | RF-002 | T-01 | [x] |
+| T-04 | Estructura de `apps/mobile` + skill `expo-router-mvvm` | frontend-dev | RF-002 | T-01 | [x] |
+| T-05 | `packages/*` con README de propósito | backend-dev | RF-001 | T-01 | [x] |
+| T-06 | Docker: compose, Dockerfiles, `.dockerignore` + skill `docker-dev` | backend-dev | RF-004, RF-005, RF-006, CB-001, CB-002, CB-004 | T-02, T-03 | [x] |
+| T-07 | Actualizar `CLAUDE.md` raíz (estructura, referencias a skills, comandos) | orquestador | RF-002 | T-01…T-06 | [x] |
 
 ## Cómo se verifica cada tarea
 - **T-01, T-05:** existen los archivos; JSON y YAML válidos (CA-001).

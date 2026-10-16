@@ -118,13 +118,25 @@ Una tarea o funcionalidad está terminada solo si:
 - **De flujo:** las 7 del flujo SDD.
 - **Comunes:** `protocolo-subagente`, `memoria-engram`.
 - **De conocimiento:** `dominio-ropa-usada`, `redaccion-specs`, `decisiones-arquitectura`, `estrategia-entrega`, `revision-seguridad`, `requisitos-plataforma`.
-- **De convenciones por tecnología:** primero las oficiales, luego las propias (catálogo en ADR-004).
+- **De convenciones por tecnología:** primero las oficiales, luego las propias (catálogo en ADR-004):
+  - `nestjs-hexagonal` para `apps/api`.
+  - `nextjs-app-router` para `apps/web`.
+  - `expo-router-mvvm` para `apps/mobile`.
+  - `docker-dev` para Docker y la infraestructura local.
 
 **Context7:** consúltalo SIEMPRE antes de usar una API de terceros.
 
 ## Estructura del repositorio
 
 ```
+apps/
+  api/              NestJS hexagonal (módulos por contexto: domain/application/infrastructure/interface)
+  web/              Next.js App Router (app/, features/, shared/); panel de administración
+  mobile/           Expo Router + MVVM (app de compradores; se genera con su primera rebanada)
+packages/           @perchados/contracts, api-client, ui-tokens, config
+docker/             Scripts de inicialización de PostgreSQL
+docker-compose.yml  postgres, storage (SeaweedFS S3), mailpit; perfil "apps" con api y web
+.env.example        Todas las variables (el .env real nunca se versiona)
 specs/
   00-vision/        Visión, roadmap y glosario
   01-arquitectura/  Stack y ADRs
@@ -138,7 +150,13 @@ specs/
 
 - Stack, entorno, equipo y requisitos por plataforma propuestos en ADR-001 a ADR-006, pendientes de aceptación.
 - Capa horizontal `000-estructura-monorepo` pendiente de aprobación. Visión de producto pendiente.
-- Comandos de build, test, lint y typecheck: se documentarán aquí al generar las apps.
+- **Comandos**, siempre desde la raíz, con pnpm 10 y Node 24:
+
+  | Comando | Qué hace |
+  |---------|----------|
+  | `pnpm infra:up` / `pnpm infra:down` | Levanta o para la infraestructura (Docker) |
+  | `docker compose --profile apps up -d` | Levanta además la api y la web |
+  | `pnpm dev`, `pnpm build`, `pnpm test`, `pnpm lint`, `pnpm typecheck`, `pnpm format` | Vía Turborepo; operativos cuando la 002 genere las apps |
 - Requisitos del entorno:
   - Instalado: Python 3.
   - Pendientes: Node.js 24 LTS, Docker Desktop, Engram, `typescript-language-server` y la variable `GITHUB_PERSONAL_ACCESS_TOKEN`.

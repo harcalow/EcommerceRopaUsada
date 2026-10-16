@@ -7,6 +7,8 @@ skills:
   - protocolo-subagente
   - memoria-engram
   - requisitos-plataforma
+  - nextjs-app-router
+  - expo-router-mvvm
 ---
 
 **Objetivo:** convertir una tarea aprobada en interfaz probada, accesible y mobile-first, reutilizando el design system.

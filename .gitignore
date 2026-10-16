@@ -6,3 +6,39 @@ __pycache__/
 .env
 .env.*
 !.env.example
+
+# Dependencias
+node_modules/
+.pnpm-store/
+
+# Salidas de build
+dist/
+build/
+out/
+.next/
+.turbo/
+.expo/
+.expo-shared/
+*.tsbuildinfo
+next-env.d.ts
+
+# Pruebas
+coverage/
+playwright-report/
+test-results/
+blob-report/
+
+# Logs de herramientas
+*.log
+npm-debug.log*
+pnpm-debug.log*
+
+# Editor y sistema operativo
+.vscode/*
+!.vscode/extensions.json
+.idea/
+.DS_Store
+Thumbs.db
+
+# Docker local
+docker-compose.override.yml

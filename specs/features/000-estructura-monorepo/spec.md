@@ -2,7 +2,8 @@
 id: 000
 titulo: Estructura base del monorepo
 tipo: horizontal
-estado: borrador
+estado: aprobada
+aprobacion: dueño (Harold) el 2026-10-15, aplicada por el orquestador con su autorización explícita en el chat
 autor: arquitecto
 ---
 

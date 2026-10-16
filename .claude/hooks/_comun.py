@@ -18,6 +18,8 @@ SENSIBLE = re.compile(
     r"(gh[pousr]_[A-Za-z0-9]{20,}|github_pat_\w{20,}|APP_USR-[\w-]{10,}|TEST-[\w-]{20,}|sk-[\w-]{20,}"
     r"|eyJ[\w-]{10,}\.[\w-]{10,}\.[\w-]{10,}"
     r"|(?i:\b(password|passwd|secret|token|api[_-]?key|access[_-]?key)\b\s*[=:]\s*)\S+"
+    r"|(?i:\b(contraseña|contrasena|clave|password|passwd)\b\s*(es|inicial)?\s*[=:]?\s*)\S+"
+    r"|(?i:\w*(password|passwd|secret|token|api_?key)\w*\s*=\s*)\S+"
     r"|[\w.+-]+@[\w-]+\.[\w.-]+)"
 )
 

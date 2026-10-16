@@ -1,6 +1,7 @@
 ---
 id: ADR-003
-estado: propuesta   # propuesta | aceptada | reemplazada por ADR-XXX
+estado: aceptada   # propuesta | aceptada | reemplazada por ADR-XXX
+aprobacion: dueño (Harold) el 2026-10-15, aplicada por el orquestador con su autorización explícita en el chat
 fecha: 2026-10-15
 ---
 
