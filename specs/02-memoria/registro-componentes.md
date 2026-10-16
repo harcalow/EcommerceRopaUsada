@@ -20,6 +20,9 @@ Formato: **Nombre** · `ruta` · propósito · ejemplo de uso mínimo.
 ## Utilidades y contratos compartidos (`packages/*`)
 | Nombre | Ruta | Propósito | Uso |
 |--------|------|-----------|-----|
+| problemSchema, PROBLEM_TYPES | packages/contracts/src/common/ | Error RFC 9457 estricto y catálogo de tipos | Respuestas de error de toda la API (T-07) |
+| problemShape | packages/contracts/src/common/problem.ts | Campos base para extender el problema con extensiones (checks, lockedMinutesRemaining) | Esquemas de error con extensión |
+| createV1Registry, buildOpenApiDocument | packages/contracts/src/v1/registry.ts | Registro de esquemas y rutas; genera openapi/v1.json con pnpm contract:generate | Cada endpoint nuevo se registra aquí |
 
 ## Pruebas: page objects, selectores estables y fixtures
 | Nombre | Ruta | Propósito | Uso |

@@ -35,7 +35,7 @@ No se rehacen. Las tareas siguientes las **completan** (dependencias, apps reale
 | ID | Tarea | Agente | Cubre | Depende de | Estado |
 |----|-------|--------|-------|------------|--------|
 | T-01 | **Arranque del workspace:** versiones verificadas, `turbo` y `typescript` como `devDependencies` raíz, `package.json` `@perchados/*` de `config`, `contracts` y `api-client`, presets compartidos (tsconfig, ESLint, Vitest), scripts raíz, instalación y `pnpm-lock.yaml` | backend-dev | RT-001, RT-002, RT-003 | Hito 0 | [x] |
-| T-02 | **Contrato v1 base:** `problemSchema`, `PROBLEM_TYPES` (tipos del hito 1), esquemas de health, registro y generación de `openapi/v1.json` | backend-dev | RT-004, RT-005, RT-016 | T-01 | [ ] |
+| T-02 | **Contrato v1 base:** `problemSchema`, `PROBLEM_TYPES` (tipos del hito 1), esquemas de health, registro y generación de `openapi/v1.json` | backend-dev | RT-004, RT-005, RT-016 | T-01 | [x] |
 | T-03 | `packages/api-client`: generación con `openapi-typescript`, `createApiClient` (`openapi-fetch`), middleware de correlación y `contract:check` | frontend-dev | RT-004 | T-02 | [ ] |
 | T-04 | Generar `apps/api` (NestJS) sobre la estructura hexagonal: versionado `/v1`, Vitest + SWC, reglas de capas en ESLint, puerto configurable | backend-dev | RT-001, RT-002, RT-005 | T-01 | [ ] |
 | T-05 | Configuración de la API validada con Zod (`loadConfig`, `AppConfig`) y variables nuevas en `.env.example` | backend-dev | RT-007 | T-04 | [ ] |
