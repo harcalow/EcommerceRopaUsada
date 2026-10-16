@@ -1,4 +1,4 @@
-# @repo/ui-tokens
+# @perchados/ui-tokens
 
 Tokens de marca compartidos por web y mobile.
 
@@ -17,4 +17,4 @@ Una sola definición de la identidad visual para ambas plataformas.
 - ❌ No usar valores literales de color o espaciado en las apps.
 
 ## Capa en que se rellena
-Capa 002 (fundaciones), a partir del mockup de Perchados.
+001 (base técnica), a partir del mockup de Perchados.

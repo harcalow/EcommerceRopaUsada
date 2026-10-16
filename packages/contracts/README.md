@@ -1,4 +1,4 @@
-# @repo/contracts
+# @perchados/contracts
 
 Fuente de verdad del contrato de la API.
 
@@ -21,4 +21,4 @@ Define los esquemas Zod de entradas y salidas de la API y de ellos se genera el 
 - ❌ No romper `/v1` una vez publicado.
 
 ## Capa en que se rellena
-Capa 002 (fundaciones): esquema `problem+json` y base de OpenAPI. Después, cada rebanada añade los suyos.
+001 (base técnica): esquema `problem+json` y base de OpenAPI. Después, cada rebanada añade los suyos.

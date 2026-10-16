@@ -12,7 +12,18 @@
     "lint": "turbo run lint",
     "typecheck": "turbo run typecheck",
     "format": "turbo run format",
+    "db:migrate": "turbo run db:migrate",
+    "db:migrate:deploy": "turbo run db:migrate:deploy",
+    "db:seed": "turbo run db:seed",
+    "contract:generate": "turbo run contract:generate",
+    "contract:check": "turbo run contract:check",
+    "test:e2e": "turbo run test:e2e",
     "infra:up": "docker compose up -d",
     "infra:down": "docker compose down"
+  },
+  "devDependencies": {
+    "@perchados/config": "workspace:*",
+    "turbo": "2.11.5",
+    "typescript": "6.0.3"
   }
 }

@@ -1,4 +1,4 @@
-# @repo/config
+# @perchados/config
 
 Configuración compartida del monorepo.
 
@@ -18,4 +18,4 @@ Evitar duplicar configuración de herramientas entre apps y paquetes.
 - ❌ No suprimir reglas de lint sin justificación.
 
 ## Capa en que se rellena
-Capa 001/002, cuando se instalen las herramientas (ADR-001).
+001 (base técnica), cuando se instalen las herramientas (ADR-001).

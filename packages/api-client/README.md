@@ -1,4 +1,4 @@
-# @repo/api-client
+# @perchados/api-client
 
 Cliente tipado de la API, generado desde el OpenAPI.
 
@@ -19,4 +19,4 @@ Es el único medio por el que web y mobile llaman a la API.
 - ❌ Las apps no usan `fetch` ni `axios` directos contra la API.
 
 ## Capa en que se rellena
-Capa 002 (fundaciones), cuando exista el primer OpenAPI; después, con cada rebanada.
+001 (base técnica), cuando exista el primer OpenAPI; después, con cada rebanada.
