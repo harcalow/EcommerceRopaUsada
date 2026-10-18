@@ -1,4 +1,4 @@
----
+---[x] |[x] |[x] |
 id: 001
 diseno: ./diseno.md
 estado: pendiente # pendiente | en-curso | completada  (no requiere aprobación humana)
@@ -36,61 +36,76 @@ No se rehacen. Las tareas siguientes las **completan** (dependencias, apps reale
 |----|-------|--------|-------|------------|--------|
 | T-01 | **Arranque del workspace:** versiones verificadas, `turbo` y `typescript` como `devDependencies` raíz, `package.json` `@perchados/*` de `config`, `contracts` y `api-client`, presets compartidos (tsconfig, ESLint, Vitest), scripts raíz, instalación y `pnpm-lock.yaml` | backend-dev | RT-001, RT-002, RT-003 | Hito 0 | [x] |
 | T-02 | **Contrato v1 base:** `problemSchema`, `PROBLEM_TYPES` (tipos del hito 1), esquemas de health, registro y generación de `openapi/v1.json` | backend-dev | RT-004, RT-005, RT-016 | T-01 | [x] |
-| T-03 | `packages/api-client`: generación con `openapi-typescript`, `createApiClient` (`openapi-fetch`), middleware de correlación y `contract:check` | frontend-dev | RT-004 | T-02 | [ ] |
-| T-04 | Generar `apps/api` (NestJS) sobre la estructura hexagonal: versionado `/v1`, Vitest + SWC, reglas de capas en ESLint, puerto configurable | backend-dev | RT-001, RT-002, RT-005 | T-01 | [ ] |
-| T-05 | Configuración de la API validada con Zod (`loadConfig`, `AppConfig`) y variables nuevas en `.env.example` | backend-dev | RT-007 | T-04 | [ ] |
-| T-06 | Correlación (`X-Correlation-Id`) y logs JSON con `nestjs-pino` + `sanitize()` | backend-dev | RT-006, RNF Seguridad | T-05 | [ ] |
-| T-07 | Errores `problem+json` (`ProblemException`, filtro global, body-parser, 404 fuera de `/v1`) + `ZodValidationPipe`/`@ZodBody` + `no-store` | backend-dev | RT-005 | T-02, T-06 | [ ] |
-| T-08 | Prisma 7 + `adapter-pg` (conexión perezosa), migración `roles_y_cuentas` (con `username`, `username_key`, `failed_attempts`, `locked_until` y el rol `admin`), scripts `db:migrate*` y `createTestApp` con BD de pruebas | backend-dev | RT-008, RF-018 (modelo), RF-019 (rol), RF-023 (modelo), CB-002 (clave) | T-05 | [ ] |
-| T-09 | *Runner* de semillas idempotente y transaccional (`db:seed`), sin pasos de producción todavía | backend-dev | RT-009 | T-08 | [ ] |
-| T-10 | `HealthModule`: `GET /v1/health` público, tiempo máximo de 2 s y caché de 2 s | backend-dev | RT-016 | T-02, T-07, T-08 | [ ] |
-| T-11 | Pruebas de contrato con Ajv contra `v1.json` + prueba de cobertura de rutas | backend-dev | RT-004 | T-03, T-10 | [ ] |
-| T-12 | Generar `apps/web` (Next.js App Router): configuración de servidor validada en `instrumentation.ts` (incluye `ADMIN_CONTACT_EMAIL`), ruta `/healthz`, `not-found` | frontend-dev | RT-001, RT-002, RT-007 | T-01 | [ ] |
-| T-13 | Clientes de API de la web (`server-client`, `browser-client`, `ApiConfigProvider`) y regla de ESLint «sin `fetch` directo a la API» | frontend-dev | RT-004 | T-03, T-12 | [ ] |
-| T-14 | **Docker con las apps reales:** healthchecks, `depends_on`, volumen de `node_modules`, *polling*, `standalone`, etapa `prod` sin root | backend-dev | RT-016, RT-017 | T-10, T-13 | [ ] |
-| T-15 | CI `.github/workflows/ci.yml`: jobs `calidad` y `seguridad` + script de migraciones inmutables | backend-dev | RT-008, RT-020 | T-11, T-14 | [ ] |
+| T-03 | `packages/api-client`: generación con `openapi-typescript`, `createApiClient` (`openapi-fetch`), middleware de correlación y `contract:check` | frontend-dev | RT-004 | T-02 | [x] |
+| T-04 | Generar `apps/api` (NestJS) sobre la estructura hexagonal: versionado `/v1`, Vitest + SWC, reglas de capas en ESLint, puerto configurable | backend-dev | RT-001, RT-002, RT-005 | T-01 | [x] |
+| T-05 | Configuración de la API validada con Zod (`loadConfig`, `AppConfig`) y variables nuevas en `.env.example` | backend-dev | RT-007 | T-04 | [x] |
+| T-06 | Correlación (`X-Correlation-Id`) y logs JSON con `nestjs-pino` + `sanitize()` | backend-dev | RT-006, RNF Seguridad | T-05 | [x] |
+| T-07 | Errores `problem+json` (`ProblemException`, filtro global, body-parser, 404 fuera de `/v1`) + `ZodValidationPipe`/`@ZodBody` + `no-store` | backend-dev | RT-005 | T-02, T-06 | [x] |
+| T-08 | Prisma 7 + `adapter-pg` (conexión perezosa), migración `roles_y_cuentas` (con `username`, `username_key`, `failed_attempts`, `locked_until` y el rol `admin`), scripts `db:migrate*` y `createTestApp` con BD de pruebas | backend-dev | RT-008, RF-018 (modelo), RF-019 (rol), RF-023 (modelo), CB-002 (clave) | T-05 | [x] |
+| T-09 | *Runner* de semillas idempotente y transaccional (`db:seed`), sin pasos de producción todavía | backend-dev | RT-009 | T-08 | [x] |
+| T-10 | `HealthModule`: `GET /v1/health` público, tiempo máximo de 2 s y caché de 2 s | backend-dev | RT-016 | T-02, T-07, T-08 | [x] |
+| T-11 | Pruebas de contrato con Ajv contra `v1.json` + prueba de cobertura de rutas | backend-dev | RT-004 | T-03, T-10 | [x] |
+| T-12 | Generar `apps/web` (Next.js App Router): configuración de servidor validada en `instrumentation.ts` (incluye `ADMIN_CONTACT_EMAIL`), ruta `/healthz`, `not-found` | frontend-dev | RT-001, RT-002, RT-007 | T-01 | [x] |
+| T-13 | Clientes de API de la web (`server-client`, `browser-client`, `ApiConfigProvider`) y regla de ESLint «sin `fetch` directo a la API» | frontend-dev | RT-004 | T-03, T-12 | [x] |
+| T-14 | **Docker con las apps reales:** healthchecks, `depends_on`, volumen de `node_modules`, *polling*, `standalone`, etapa `prod` sin root | backend-dev | RT-016, RT-017 | T-10, T-13 | [x] |
+| T-15 | CI `.github/workflows/ci.yml`: jobs `calidad` y `seguridad` + script de migraciones inmutables | backend-dev | RT-008, RT-020 | T-11, T-14 | [x] |
 
 ## Hito 2 — Autenticación (API) · PR «feat(001): hito 2 — contrato auth, hash, sesión, guards, límites y login»
 ⚠️ **Revisión humana obligatoria** (autenticación, permisos y datos de cuentas).
 
 | ID | Tarea | Agente | Cubre | Depende de | Estado |
 |----|-------|--------|-------|------------|--------|
-| T-16 | **Contrato auth:** `usernameSchema`, `loginPasswordSchema`/`passwordInputSchema`, `LoginRequest`, `SessionInfo`, rutas `login`, `session` y `logout`, tipos `auth/*`, `rate-limit-exceeded` y `auth/account-locked`; regenerar documento y cliente | backend-dev | RF-001, RF-003, RF-015, RF-016, CA-002, CA-014, CA-015, CB-001, CB-014, CB-015, CB-016 | Hito 1 | [ ] |
-| T-17 | Puerto `Clock` + `PasswordHasher` con `Argon2idPasswordHasher` (NFC, `verifyDummy`, rehash), mínimos OWASP en la configuración y `bench:hash` | backend-dev | RF-018, RT-010, RT-021 | T-16 | [ ] |
-| T-18 | Paso de semilla `admin-inicial` (`HaroldAdmin` con rol `admin` desde `ADMIN_INITIAL_PASSWORD`) | backend-dev | RF-018, RF-019, CA-017 | T-09, T-17 | [ ] |
-| T-19 | Migración `sesiones` + dominio `Session` + `SessionRepository` + casos de uso `OpenSession`, `ValidateSession` (incluye `account.status`) y `RevokeSession` | backend-dev | RF-020, RT-011, CA-018 (dominio), CB-012 (dominio) | T-17 | [ ] |
-| T-20 | `SessionGuard` global (privado por defecto) + `@Public`, `@CurrentSession`, escritor de cookies y endpoints `GET /v1/auth/session` y `POST /v1/auth/logout` | backend-dev | RF-011, RF-012, RF-020, RT-011, RT-013, CA-011 (API), CA-018, CB-012, CB-017, CB-018 | T-19 | [ ] |
-| T-21 | `RolesGuard` + `@Roles` contra el rol leído de la BD | backend-dev | RF-023, RT-013 | T-20 | [ ] |
-| T-22 | `CsrfGuard` (token sincronizador + `Origin`) y CORS con lista cerrada y credenciales | backend-dev | RT-012 | T-20 | [ ] |
-| T-23 | Límite de peticiones: migración `limite_peticiones_y_bloqueo` (`rate_limit_counter`, `login_attempt_unknown`), `PostgresThrottlerStorage`, throttlers `global`/`strict`, `@StrictRateLimit`, `TRUST_PROXY`, 429 + `Retry-After` | backend-dev | RT-014 | T-16, T-20 | [ ] |
-| T-24 | **Dominio del bloqueo y repositorios:** `LoginLock` (5 fallos → 30 min, vencimiento, contador nuevo), incremento atómico en `account`, imitación en `login_attempt_unknown` | backend-dev | RF-008, RF-009, RF-017, CA-007, CA-008, CA-016, CB-004, CB-005, CB-006, CB-013 | T-23 | [ ] |
-| T-25 | **Caso de uso `LogIn` y `POST /v1/auth/login`:** búsqueda por `username_key`, `verifyDummy`, rol `admin`, apertura de sesión, `@StrictRateLimit`, eventos de auditoría | backend-dev | RF-001, RF-004, RF-008, RF-009, RF-017, RF-023, CA-001, CA-003, CA-007, CA-008, CA-016, CA-017, CA-019, CB-001 a CB-006, CB-012, CB-013, RT-021 | T-18, T-21, T-22, T-24 | [ ] |
-| T-26 | Cabeceras de seguridad de la API (helmet) + prueba de la lista blanca de rutas públicas + pruebas de contrato de las rutas auth | backend-dev | RT-004, RT-013, RT-015 | T-25 | [ ] |
+| T-16 | **Contrato auth:** `usernameSchema`, `loginPasswordSchema`/`passwordInputSchema`, `LoginRequest`, `SessionInfo`, rutas `login`, `session` y `logout`, tipos `auth/*`, `rate-limit-exceeded` y `auth/account-locked`; regenerar documento y cliente | backend-dev | RF-001, RF-003, RF-015, RF-016, CA-002, CA-014, CA-015, CB-001, CB-014, CB-015, CB-016 | Hito 1 | [x] |
+| T-17 | Puerto `Clock` + `PasswordHasher` con `Argon2idPasswordHasher` (NFC, `verifyDummy`, rehash), mínimos OWASP en la configuración y `bench:hash` | backend-dev | RF-018, RT-010, RT-021 | T-16 | [x] |
+| T-18 | Paso de semilla `admin-inicial` (`HaroldAdmin` con rol `admin` desde `ADMIN_INITIAL_PASSWORD`) | backend-dev | RF-018, RF-019, CA-017 | T-09, T-17 | [x] |
+| T-19 | Migración `sesiones` + dominio `Session` + `SessionRepository` + casos de uso `OpenSession`, `ValidateSession` (incluye `account.status`) y `RevokeSession` | backend-dev | RF-020, RT-011, CA-018 (dominio), CB-012 (dominio) | T-17 | [x] |
+| T-20 | `SessionGuard` global (privado por defecto) + `@Public`, `@CurrentSession`, escritor de cookies y endpoints `GET /v1/auth/session` y `POST /v1/auth/logout` | backend-dev | RF-011, RF-012, RF-020, RT-011, RT-013, CA-011 (API), CA-018, CB-012, CB-017, CB-018 | T-19 | [x] |
+| T-21 | `RolesGuard` + `@Roles` contra el rol leído de la BD | backend-dev | RF-023, RT-013 | T-20 | [x] |
+| T-22 | `CsrfGuard` (token sincronizador + `Origin`) y CORS con lista cerrada y credenciales | backend-dev | RT-012 | T-20 | [x] |
+| T-23 | Límite de peticiones: migración `limite_peticiones_y_bloqueo` (`rate_limit_counter`, `login_attempt_unknown`), `PostgresThrottlerStorage`, throttlers `global`/`strict`, `@StrictRateLimit`, `TRUST_PROXY`, 429 + `Retry-After` | backend-dev | RT-014 | T-16, T-20 | [x] |
+| T-24 | **Dominio del bloqueo y repositorios:** `LoginLock` (5 fallos → 30 min, vencimiento, contador nuevo), incremento atómico en `account`, imitación en `login_attempt_unknown` | backend-dev | RF-008, RF-009, RF-017, CA-007, CA-008, CA-016, CB-004, CB-005, CB-006, CB-013 | T-23 | [x] |
+| T-25 | **Caso de uso `LogIn` y `POST /v1/auth/login`:** búsqueda por `username_key`, `verifyDummy`, rol `admin`, apertura de sesión, `@StrictRateLimit`, eventos de auditoría | backend-dev | RF-001, RF-004, RF-008, RF-009, RF-017, RF-023, CA-001, CA-003, CA-007, CA-008, CA-016, CA-017, CA-019, CB-001 a CB-006, CB-012, CB-013, RT-021 | T-18, T-21, T-22, T-24 | [x] |
+| T-26 | Cabeceras de seguridad de la API (helmet) + prueba de la lista blanca de rutas públicas + pruebas de contrato de las rutas auth | backend-dev | RT-004, RT-013, RT-015 | T-25 | [x] |
 
 ## Hito 3 — Interfaz web · PR «feat(001): hito 3 — tokens, componentes, pantalla de login y panel»
 | ID | Tarea | Agente | Cubre | Depende de | Estado |
 |----|-------|--------|-------|------------|--------|
-| T-27 | `packages/ui-tokens`: `tokens.ts`, generación de `tokens.css`, pares de contraste + prueba, preset de Stylelint con `declaration-strict-value` | frontend-dev | RT-018, RNF Accesibilidad (contraste) | Hito 1 | [ ] |
-| T-28 | `packages/ui-web` base (`VisuallyHidden`, `Spinner`, foco global, `vitest-axe`) + fuentes y `tokens.css` en `apps/web/src/app/layout.tsx` | frontend-dev | RT-018 | T-27 | [ ] |
-| T-29 | Button | frontend-dev | RF-014, RT-018, CA-013 (componente) | T-28 | [ ] |
-| T-30 | TextField | frontend-dev | RF-003, RT-018, CA-002 (componente) | T-28 | [ ] |
-| T-31 | PasswordField (con `notice`) | frontend-dev | RF-005, RF-006, RT-018, CA-004, CB-008 | T-30 | [ ] |
-| T-32 | Link | frontend-dev | RF-007, RT-018 | T-28 | [ ] |
-| T-33 | Alert | frontend-dev | RF-004, RF-008, RF-020, RT-018 | T-28 | [ ] |
-| T-34 | Cabeceras y CSP con nonce en la web (`proxy.ts`), `no-store` y redirección optimista de `/panel/**` sin cookie | frontend-dev | RF-011, RT-015 | Hito 1 | [ ] |
-| T-35 | Pantalla `/login`: maquetación según el mockup (panel de marca, encabezado, pie informativo), responsive, sin registro ni credenciales de prueba; redirección al panel con sesión válida | frontend-dev | RF-010, RF-021, RF-022, CA-009, CB-011, RNF Responsive | T-29 a T-33, T-16 | [ ] |
-| T-36 | `LoginForm`: validación con los esquemas del contrato, errores por campo, Bloq Mayús, envío con el cliente, estados de carga, error genérico, bloqueo, sin conexión, 429 y 5xx | frontend-dev | RF-001, RF-003, RF-004, RF-006, RF-008, RF-014, RF-015, RF-016, CA-002, CA-003, CA-005, CA-007, CA-013, CA-014, CA-015, CB-001, CB-007, CB-008, CB-009 | T-35 | [ ] |
-| T-37 | «¿Olvidaste tu contraseña?»: desplegable con el correo del responsable (`ADMIN_CONTACT_EMAIL`) y enlace `mailto:` | frontend-dev | RF-007, CA-006 | T-35 | [ ] |
-| T-38 | Panel `/panel`: `requireAdminSession()` (layout y página), «Próximamente, estamos trabajando», `LogoutButton`, `SessionWatcher`, aviso de sesión caducada en `/login`, `/` → `/panel` | frontend-dev | RF-002, RF-011, RF-012, RF-020, CA-001, CA-010, CA-011, CA-018, CB-012, CB-017, CB-018 | T-34, T-36 | [ ] |
+| T-27 | `packages/ui-tokens`: `tokens.ts`, generación de `tokens.css`, pares de contraste + prueba, preset de Stylelint con `declaration-strict-value` | frontend-dev | RT-018, RNF Accesibilidad (contraste) | Hito 1 | [x] |
+| T-28 | `packages/ui-web` base (`VisuallyHidden`, `Spinner`, foco global, `vitest-axe`) + fuentes y `tokens.css` en `apps/web/src/app/layout.tsx` | frontend-dev | RT-018 | T-27 | [x] |
+| T-29 | Button | frontend-dev | RF-014, RT-018, CA-013 (componente) | T-28 | [x] |
+| T-30 | TextField | frontend-dev | RF-003, RT-018, CA-002 (componente) | T-28 | [x] |
+| T-31 | PasswordField (con `notice`) | frontend-dev | RF-005, RF-006, RT-018, CA-004, CB-008 | T-30 | [x] |
+| T-32 | Link | frontend-dev | RF-007, RT-018 | T-28 | [x] |
+| T-33 | Alert | frontend-dev | RF-004, RF-008, RF-020, RT-018 | T-28 | [x] |
+| T-34 | Cabeceras y CSP con nonce en la web (`proxy.ts`), `no-store` y redirección optimista de `/panel/**` sin cookie | frontend-dev | RF-011, RT-015 | Hito 1 | [x] |
+| T-35 | Pantalla `/login`: maquetación según el mockup (panel de marca, encabezado, pie informativo), responsive, sin registro ni credenciales de prueba; redirección al panel con sesión válida | frontend-dev | RF-010, RF-021, RF-022, CA-009, CB-011, RNF Responsive | T-29 a T-33, T-16 | [x] |
+| T-36 | `LoginForm`: validación con los esquemas del contrato, errores por campo, Bloq Mayús, envío con el cliente, estados de carga, error genérico, bloqueo, sin conexión, 429 y 5xx | frontend-dev | RF-001, RF-003, RF-004, RF-006, RF-008, RF-014, RF-015, RF-016, CA-002, CA-003, CA-005, CA-007, CA-013, CA-014, CA-015, CB-001, CB-007, CB-008, CB-009 | T-35 | [x] |
+| T-37 | «¿Olvidaste tu contraseña?»: desplegable con el correo del responsable (`ADMIN_CONTACT_EMAIL`) y enlace `mailto:` | frontend-dev | RF-007, CA-006 | T-35 | [x] |
+| T-38 | Panel `/panel`: `requireAdminSession()` (layout y página), «Próximamente, estamos trabajando», `LogoutButton`, `SessionWatcher`, aviso de sesión caducada en `/login`, `/` → `/panel` | frontend-dev | RF-002, RF-011, RF-012, RF-020, CA-001, CA-010, CA-011, CA-018, CB-012, CB-017, CB-018 | T-34, T-36 | [x] |
 
 ## Hito 4 — E2E y cierre · PR «feat(001): hito 4 — E2E del login, accesibilidad y CI»
 | ID | Tarea | Agente | Cubre | Depende de | Estado |
 |----|-------|--------|-------|------------|--------|
-| T-39 | Playwright: configuración, `BasePage`, `LoginPage`, `PanelPage`, fixture `test` con `accounts` y acceso a la BD de pruebas, reporter de inestables, script `test:e2e` | frontend-dev | RT-019 | Hito 3 | [ ] |
-| T-40 | E2E del login: un test por escenario (`CA-001` a `CA-019`) y por CB de interfaz (`CB-001`, `CB-002`, `CB-007`, `CB-011`, `CB-017`, `CB-018`) | frontend-dev | Todos los CA; CB citados; RT-019 | T-39 | [ ] |
-| T-41 | E2E de accesibilidad y responsive: axe en cada estado de `/login` y en `/panel`, 360 px, zoom del 200 %, `forcedColors`; medición de Lighthouse de `/login` anotada en el PR | frontend-dev | RNF Accesibilidad, RNF Responsive, RT-018, RT-021 | T-39 | [ ] |
-| T-42 | Job `e2e` en la CI (máximo 1 reintento solo en CI, informe como artefacto) | backend-dev | RT-019, RT-020 | T-40, T-41, T-15 | [ ] |
-| T-43 | Cierre: `registro-componentes.md`, skills `api-rest-conventions` y `prisma-datos`, README de `ui-tokens` y `ui-web`, propuesta de comandos para `CLAUDE.md` | backend-dev | DoD (componentes registrados) | T-42 | [ ] |
+| T-39 | Playwright: configuración, `BasePage`, `LoginPage`, `PanelPage`, fixture `test` con `accounts` y acceso a la BD de pruebas, reporter de inestables, script `test:e2e` | frontend-dev | RT-019 | Hito 3 | [x] |
+| T-40 | E2E del login: un test por escenario (`CA-001` a `CA-019`) y por CB de interfaz (`CB-001`, `CB-002`, `CB-007`, `CB-011`, `CB-017`, `CB-018`) | frontend-dev | Todos los CA; CB citados; RT-019 | T-39 | [x] |
+| T-41 | E2E de accesibilidad y responsive: axe en cada estado de `/login` y en `/panel`, 360 px, zoom del 200 %, `forcedColors`; medición de Lighthouse de `/login` anotada en el PR | frontend-dev | RNF Accesibilidad, RNF Responsive, RT-018, RT-021 | T-39 | [x] |
+| T-42 | Job `e2e` en la CI (máximo 1 reintento solo en CI, informe como artefacto) | backend-dev | RT-019, RT-020 | T-40, T-41, T-15 | [x] |
+| T-43 | Cierre: `registro-componentes.md`, skills `api-rest-conventions` y `prisma-datos`, README de `ui-tokens` y `ui-web`, propuesta de comandos para `CLAUDE.md` | backend-dev | DoD (componentes registrados) | T-42 | [x] |
+
+## Hito 5 — Correcciones de la revisión de la etapa 6 · PR «fix(001): hito 5 — IP del cliente web → API (RT-022) y lint de `contracts/client` (ADR-012)»
+⚠️ **Revisión humana obligatoria** (límite de peticiones de auth, secreto interno web → API y sesión del panel).
+
+Sin tarea de contrato: las cabeceras internas `X-Perchados-Internal-Token` y `X-Perchados-Client-Ip` no forman parte del contrato público ni de OpenAPI (RT-022 f); `contract:check` no debe cambiar.
+
+| ID | Tarea | Agente | Cubre | Depende de | Estado |
+|----|-------|--------|-------|------------|--------|
+| T-44 | **Entorno:** `INTERNAL_API_SECRET` y `WEB_TRUST_PROXY_HOPS` en `.env.example`, `docker-compose.yml` (a `api` y `web`; el secreto con `${INTERNAL_API_SECRET:?…}`) y la CI (secreto generado por ejecución) | backend-dev | RT-022, RT-017, RT-020 | Hito 4 | [x] |
+| T-45 | **Configuración y logs de la API:** `INTERNAL_API_SECRET` (obligatoria, ≥ 32) y `production` + `TRUST_PROXY=false` → inválida en `env.schema.ts`; `X-Perchados-Internal-Token` oculto en los logs; `createTestApp` con secreto de prueba | backend-dev | RT-022 (e, f), RT-007, RT-006 | T-44 | [x] |
+| T-46 | **IP del límite en la API:** `resolveTrackerIp` (`timingSafeEqual` sobre SHA-256, `net.isIP`, agrupación IPv6 /64) y `RateLimitGuard.getTracker()`; integración de RT-022 | backend-dev | RT-022 (c, d), RT-014 | T-45 | [x] |
+| T-47 | **Configuración del servidor web:** `INTERNAL_API_SECRET` (obligatoria, ≥ 32) y `WEB_TRUST_PROXY_HOPS` (entero ≥ 0, por defecto `0`; `production` + `0` → inválida) en `server-env.ts` | frontend-dev | RT-022 (e), RT-007 | T-44 | [x] |
+| T-48 | **`resolveClientIp`** en `apps/web/src/shared/api/client-ip.ts` (`server-only`): entrada `n`-ésima por la derecha de `X-Forwarded-For` | frontend-dev | RT-022 (a) | T-47 | [x] |
+| T-49 | **`createServerApiClient`:** deja de reenviar `X-Forwarded-For`; envía siempre `X-Perchados-Internal-Token` y `X-Perchados-Client-Ip` solo con IP resuelta | frontend-dev | RT-022 (a, b), RT-014 | T-46, T-48 | [x] |
+| T-50 | **Lint de ADR-012:** `no-restricted-imports` en `apps/web/eslint.config.mjs` para `apps/web/src/**`, que solo permite `@perchados/contracts/client` | frontend-dev | RT-004 (excepción ADR-012), RT-021 | Hito 4 | [x] |
 
 ---
 
@@ -330,6 +345,65 @@ No se rehacen. Las tareas siguientes las **completan** (dependencias, apps reale
 - **Archivos previstos:** `specs/02-memoria/registro-componentes.md` (todo lo de «Reutilización» del diseño), `.claude/skills/api-rest-conventions/SKILL.md` y `.claude/skills/prisma-datos/SKILL.md` (añadidas a `skills:` de `backend-dev`), README de `packages/ui-tokens` y `packages/ui-web`, y la propuesta de comandos para `CLAUDE.md` (la aplica el orquestador).
 - **Cómo se verifica por sí sola:** las skills tienen ejemplos ✅/❌; el registro incluye cada componente con ruta y ejemplo de uso.
 
+### Hito 5
+
+Todas las pruebas nuevas se nombran con `RT-022` (o `ADR-012` en T-50). Context7 antes de usar `node:crypto`, `node:net`, `server-only`, `headers()` de Next.js y `no-restricted-imports` de ESLint 9.
+
+#### T-44 — Entorno: variables nuevas
+- **Archivos previstos:**
+  - `.env.example`: `INTERNAL_API_SECRET=` vacío, con el comentario «generar con `openssl rand -base64 32`; mismo valor en api y web»; `WEB_TRUST_PROXY_HOPS=0`.
+  - `docker-compose.yml`: `INTERNAL_API_SECRET: ${INTERNAL_API_SECRET:?…}` en `api` y `web`; `WEB_TRUST_PROXY_HOPS` en `web`.
+  - `.github/workflows/ci.yml`: paso que genera un secreto aleatorio por ejecución (enmascarado con `::add-mask::`) y lo exporta a los jobs que arrancan la API o la web (pruebas y `e2e`).
+- **Cómo se verifica por sí sola:**
+  - `docker compose config` sin `INTERNAL_API_SECRET` falla nombrando la variable; con ella, `api` y `web` la reciben.
+  - El job de la CI en verde; el valor del secreto no aparece en el log del job (aparece `***`).
+  - Ningún valor real del secreto queda versionado (gitleaks en verde).
+
+#### T-45 — Configuración y logs de la API
+- **Archivos previstos:** `apps/api/src/shared/config/env.schema.ts` (+ `load-config.spec.ts`), `apps/api/src/shared/logging/sanitize.ts` (+ `sanitize.spec.ts`), `apps/api/test/helpers/test-app.factory.ts` (secreto de prueba exportado como constante para las pruebas que lo envían).
+- **Cómo se verifica por sí sola:**
+  - Unitarias de configuración: falta `INTERNAL_API_SECRET` → inválida y nombra la variable sin su valor; 31 caracteres → inválida; 32 → válida; `APP_ENV=production` con `TRUST_PROXY=false` → inválida; `production` con `TRUST_PROXY=1` → válida; `ci`/`local` con `false` → válida.
+  - Unitaria de `sanitize`: la cabecera `x-perchados-internal-token` (cualquier capitalización) se oculta.
+  - Toda la suite de la API sigue en verde con `createTestApp`.
+
+#### T-46 — IP del límite en la API
+- **Archivos previstos:** `apps/api/src/shared/rate-limit/{client-ip.ts, client-ip.spec.ts, rate-limit.guard.ts, rate-limit.client-ip.integration.spec.ts}`; registro de `resolveTrackerIp` en `specs/02-memoria/registro-componentes.md`.
+- **Cómo se verifica por sí sola:**
+  - Unitarias de `resolveTrackerIp`: token correcto + IP válida (IPv4 e IPv6) → esa IP (IPv6 agrupada por /64); token ausente, vacío, de otra longitud o erróneo → `req.ip`; token correcto + valor no IP (`abc`, vacío, lista con coma, espacios) → `req.ip`; varias cabeceras repetidas → `req.ip`.
+  - Integración con `createTestApp` y límites reducidos, todas por el mismo socket de supertest:
+    - Sin token y con token erróneo, variar `X-Perchados-Client-Ip` no cambia el cubo: N+1 → 429 (la cabecera se ignora).
+    - Con token válido, IP A agota su cubo (N+1 → 429 con `Retry-After`) e IP B sigue en 200; también en el límite estricto de `POST /v1/auth/login`.
+    - Con token válido y valor no IP → se cuenta en el cubo de `req.ip`.
+    - Capturando stdout: el valor del token no aparece en ninguna línea de log.
+  - Las pruebas existentes de `TRUST_PROXY` (`rate-limit.integration.spec.ts`, `rate-limit.trust-proxy.integration.spec.ts`) siguen en verde sin cambios.
+  - El token no exime de sesión ni de CSRF: una ruta privada con token válido y sin cookie → 401.
+
+#### T-47 — Configuración del servidor web
+- **Archivos previstos:** `apps/web/src/shared/config/server-env.ts` (+ `server-env.test.ts`).
+- **Cómo se verifica por sí sola:**
+  - Unitarias: falta `INTERNAL_API_SECRET` o < 32 caracteres → inválida y nombra la variable sin su valor; `WEB_TRUST_PROXY_HOPS` ausente → `0`; `-1`, `1.5` o texto → inválida; `APP_ENV=production` con `0` → inválida; `production` con `1` → válida.
+  - El módulo importa `server-only` (prueba que lo comprueba).
+
+#### T-48 — `resolveClientIp`
+- **Archivos previstos:** `apps/web/src/shared/api/{client-ip.ts, client-ip.test.ts}`; registro en `specs/02-memoria/registro-componentes.md`.
+- **Cómo se verifica por sí sola:**
+  - Unitarias: saltos `0` → sin IP aunque haya cabecera; `1` con `"a, b"` → `b`; `2` con `"a, b, c"` → `b`; más saltos que entradas → sin IP; cabecera ausente o vacía → sin IP; entradas con espacios → se recortan; entrada no IP → sin IP; IPv6 válida → esa IP.
+  - El módulo importa `server-only`.
+
+#### T-49 — `createServerApiClient` con la IP del cliente
+- **Archivos previstos:** `apps/web/src/shared/api/{server-client.ts, server-client.test.ts}`; actualización de su entrada en `specs/02-memoria/registro-componentes.md`.
+- **Cómo se verifica por sí sola:**
+  - Unitarias (con `fetch` simulado): una petición entrante con `X-Forwarded-For` falso no lo reenvía nunca; con IP resuelta envía `X-Perchados-Internal-Token` y `X-Perchados-Client-Ip`; sin IP resuelta envía solo el token; sigue reenviando `Cookie` y `X-Correlation-Id` válido.
+  - El secreto no llega al navegador: tras `pnpm --filter web build` con un secreto marcador, el marcador no aparece en los archivos estáticos del cliente (comprobación por script, anotada en el PR).
+  - `pnpm test:e2e` sigue en verde (login y panel por SSR con `WEB_TRUST_PROXY_HOPS=0`).
+
+#### T-50 — Lint de `@perchados/contracts/client` (ADR-012)
+- **Archivos previstos:** `apps/web/eslint.config.mjs` (`no-restricted-imports` con `paths`/`patterns` para `@perchados/contracts` y sus subrutas salvo `/client`, aplicado a `src/**`; `e2e/**` no se restringe).
+- **Cómo se verifica por sí sola:**
+  - Un archivo de muestra temporal en `apps/web/src` que importa `@perchados/contracts` hace fallar `pnpm lint` con archivo, línea y un mensaje que remite a ADR-012; se borra antes del commit (resultado anotado en el PR).
+  - Un import de `@perchados/contracts/client` en `src` y de la entrada principal en `e2e/**` pasan el lint.
+  - `pnpm lint` en verde sobre el código actual.
+
 ---
 
 ## Definición de hecho (común a todas las tareas)
@@ -345,5 +419,5 @@ No se rehacen. Las tareas siguientes las **completan** (dependencias, apps reale
 - **RF:** RF-001 a RF-012, RF-014 a RF-023 (la spec no tiene RF-013), todos asignados.
 - **CA:** CA-001 a CA-011 y CA-013 a CA-019, todos con prueba de API o de componente y con E2E en T-40.
 - **CB:** CB-001 a CB-009 y CB-011 a CB-018 (la spec no tiene CB-010), todos asignados.
-- **RT:** RT-001 a RT-021, todos asignados.
-- **Recuento:** 7 tareas de base hechas (B-01 a B-07) + 43 tareas pendientes (T-01 a T-43) en 4 hitos.
+- **RT:** RT-001 a RT-022, todos asignados (RT-022 y la regla de lint de ADR-012 en el hito 5).
+- **Recuento:** 7 tareas de base (B-01 a B-07) + 50 tareas (T-01 a T-50) en 5 hitos; el hito 5 recoge las correcciones de la revisión de la etapa 6.

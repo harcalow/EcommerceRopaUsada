@@ -1,9 +1,9 @@
 ---
 id: 001
 spec: ./spec.md
-estado: aprobada # borrador | aprobada | cumplida
+estado: aprobada # borrador | aprobada | cumplida — reaprobada por el dueño (Harold) el 2026-10-18 en el chat tras los hallazgos de la etapa 6 (ADR-011, ADR-012, t=10)
 autor: arquitecto
-adr: [ADR-001, ADR-003, ADR-006, ADR-007, ADR-008, ADR-009, ADR-010]
+adr: [ADR-001, ADR-003, ADR-006, ADR-007, ADR-008, ADR-009, ADR-010, ADR-011, ADR-012]
 ---
 
 # Diseño 001 — Login de administrador (incluye la base técnica)
@@ -33,17 +33,17 @@ No son requisitos de producto: son las condiciones técnicas que el login y la D
 | RT-001 | **Comandos únicos** desde la raíz: `dev`, `build`, `test`, `lint`, `typecheck`, `db:migrate`, `db:migrate:deploy`, `db:seed`, `contract:generate`, `contract:check` y `test:e2e`, ejecutados vía Turborepo en cada app y paquete que los define | Cada comando termina con 0 en un repo limpio tras `pnpm install --frozen-lockfile`; hoy `pnpm test` falla con «turbo not found» | ADR-001; CLAUDE.md (Comandos) |
 | RT-002 | **TypeScript estricto** (`strict`, `noUncheckedIndexedAccess`) y **ESLint** (`typescript-eslint` `strictTypeChecked`, `jsx-a11y` en la web, `no-explicit-any`, reglas de capas hexagonales con `no-restricted-imports`) | Un error de tipos o de lint de muestra hace fallar el comando con archivo y línea; `domain/` que importa `@nestjs/*` falla | DoD (sin `any`, sin violar capas) |
 | RT-003 | **Cobertura ≥ 80 % de líneas** por paquete (Vitest + `@vitest/coverage-v8`), con exclusiones documentadas (código generado, `*.config.*`, `main.ts`, `*.module.ts`, migraciones) | Una cobertura de muestra por debajo del umbral hace fallar `test` nombrando el paquete y el porcentaje | DoD (pruebas); decisión del dueño del 15-10-2026 |
-| RT-004 | **Contrato primero:** los esquemas viven una sola vez en Zod en `packages/contracts`; se genera `openapi/v1.json` (versionado) y el cliente tipado `packages/api-client`; la web solo llama a la API con ese cliente | `contract:check` falla si el cliente o el documento no están al día; pruebas de contrato con Ajv validan las respuestas reales; una ruta de Nest sin entrada en el documento falla | ADR-006 (API), ADR-008 |
+| RT-004 | **Contrato primero:** los esquemas viven una sola vez en Zod en `packages/contracts`; se genera `openapi/v1.json` (versionado) y el cliente tipado `packages/api-client`; la web solo llama a la API con ese cliente | `contract:check` falla si el cliente o el documento no están al día; pruebas de contrato con Ajv validan las respuestas reales; una ruta de Nest sin entrada en el documento falla. **Excepción acotada (ADR-012):** ver «Excepción a RT-004: esquemas de navegador» | ADR-006 (API), ADR-008, ADR-012 |
 | RT-005 | **API versionada y errores uniformes:** todas las rutas bajo `/v1`; todo error es `application/problem+json` con `type`, `title`, `status`, `detail` y `correlationId`; los 500 no revelan detalles internos | Integración: ruta fuera de `/v1` → 404 `problem+json`; cuerpo inválido → 400 con `errors[]`; error no controlado → 500 sin traza (que sí aparece en el log) | ADR-006 (API); DoD |
 | RT-006 | **Correlación y logs JSON:** id de correlación por petición (se reutiliza si es válido, `^[A-Za-z0-9._-]{1,128}$`), cabecera `X-Correlation-Id`, logs pino de una línea con nivel, mensaje y `correlationId`; contraseñas, cookies, tokens y `Authorization` ocultos | Integración capturando stdout: mismo id en cabecera y logs; la contraseña de prueba y la cookie no aparecen; `LOG_LEVEL=warn` sin líneas `info` | DoD (logs); RNF Seguridad («las contraseñas nunca se registran») |
 | RT-007 | **Configuración validada al arrancar** (API y servidor web) con Zod: si falta o es inválida una variable, el proceso sale con código ≠ 0 y nombra la variable sin mostrar su valor | Unitarias del esquema: falta `DATABASE_URL`, URL mal formada, `SESSION_TTL_HOURS` = 0, negativo o texto | DoD (secretos solo en variables de entorno); ADR-008 |
 | RT-008 | **Prisma y migraciones versionadas:** una migración por cambio; `db:migrate:deploy` es idempotente; una migración fusionada en `main` no se modifica | `db:migrate:deploy` dos veces sobre BD vacía → la segunda no aplica nada; la CI falla si un PR modifica una migración de `main` o hay deriva esquema/migraciones | ADR-006 (API); RF-018 |
 | RT-009 | **Semilla idempotente y transaccional** que lee los valores sensibles solo del entorno y valida todas las variables antes de escribir | Dos ejecuciones crean los datos una vez; sin la variable sale con ≠ 0, la nombra y no deja datos parciales; la salida no contiene valores sensibles | Spec «Datos iniciales»; RF-019 |
-| RT-010 | **Hash argon2id** con parámetros ≥ OWASP (`m=19456 KiB, t=4, p=1` iniciales), NFC antes de hashear, máximo 128 caracteres, `verifyDummy()` para igualar tiempos, rehash si los parámetros guardados son inferiores | Unitarias: dos hashes distintos, verificación sensible a mayúsculas, parámetros por debajo del mínimo → configuración inválida; `bench:hash` entre 100 y 500 ms | RF-018; ADR-007; RNF Rendimiento (≤ 1 s p95) |
+| RT-010 | **Hash argon2id** con parámetros ≥ OWASP (`m=19456 KiB, t=10, p=1`, calibrados en el hito 2; ver «Calibración de argon2id»), NFC antes de hashear, máximo 128 caracteres, `verifyDummy()` para igualar tiempos, rehash si los parámetros guardados son inferiores | Unitarias: dos hashes distintos, verificación sensible a mayúsculas, parámetros por debajo del mínimo → configuración inválida; `bench:hash` entre 100 y 500 ms (mediana) en el hardware donde se ejecuta; se repite en el hardware de producción antes del primer despliegue | RF-018; ADR-007; RNF Rendimiento (≤ 1 s p95) |
 | RT-011 | **Sesión en servidor** con cookie opaca (`HttpOnly; SameSite=Strict; Path=/; Secure` fuera de local), token de 256 bits guardado solo como SHA-256, caducidad absoluta `SESSION_TTL_HOURS` (8) desde `createdAt`, revocación inmediata, identificador nuevo en cada login | Integración con `Clock` controlado: 7 h 59 min válida, 8 h 00 min → 401 `auth/session-expired`; tras logout la copia de la cookie da 401 | RF-012, RF-020; ADR-007 |
 | RT-012 | **CSRF y CORS:** métodos no seguros con sesión exigen `X-CSRF-Token` (sincronizador); todo método no seguro con `Origin` no permitido → 403; CORS solo con `CORS_ALLOWED_ORIGINS` y credenciales | Integración: logout sin token → 403 sin cambios; login con `Origin` ajeno → 403 | ADR-007; RNF Seguridad |
 | RT-013 | **Privado por defecto y rol leído de la BD:** guards globales `ThrottlerGuard` → `SessionGuard` (`@Public()` lo exime) → `RolesGuard` (`@Roles('admin')` contra `role.code`) → `CsrfGuard` | Integración: ruta sin declarar → 401; cambiar el rol en BD cambia el resultado sin abrir sesión nueva; la lista de rutas `@Public` coincide con una lista blanca | RF-011, RF-023; RNF Permisos |
-| RT-014 | **Límite de peticiones:** 100/min por IP global y 10/min por IP adicional en las rutas de auth (`@StrictRateLimit()`); almacén PostgreSQL (sobrevive a reinicios); 429 `problem+json` con `Retry-After`; `/v1/health` exento | Integración con límites reducidos: N+1 → 429; otra IP sigue atendida; el contador persiste tras recrear la app | ADR-006 (API); ADR-008 |
+| RT-014 | **Límite de peticiones:** 100/min por IP global y 10/min por IP adicional en las rutas de auth (`@StrictRateLimit()`); almacén PostgreSQL (sobrevive a reinicios); 429 `problem+json` con `Retry-After`; `/v1/health` exento. **La IP que cuenta es la del cliente final** en los dos caminos (navegador → API y navegador → web → API), resuelta según RT-022 | Integración con límites reducidos: N+1 → 429; otra IP sigue atendida; el contador persiste tras recrear la app; agotar el cubo de una IP de cliente a través de la web no afecta a otra IP de cliente que llega por la web (RT-022) | ADR-006 (API); ADR-008; ADR-011 |
 | RT-015 | **Cabeceras de seguridad:** API con helmet (`CSP default-src 'none'`, `nosniff`, `Referrer-Policy: no-referrer`, HSTS en producción, sin `X-Powered-By`, `Cache-Control: no-store`); web con CSP con nonce y cabeceras equivalentes | Integración (API) y unitaria (web): cabeceras presentes; la pantalla de login carga sin violaciones de CSP | RNF Seguridad («conexión cifrada»); OWASP A05 |
 | RT-016 | **Healthcheck** `GET /v1/health` público y sin límite: 200 con BD disponible, 503 `problem+json` en ≤ 3 s sin detalles internos; la API arranca sin BD y se recupera sin reiniciar | Integración: 200 / 503 con un *probe* a un puerto cerrado; Docker marca `api` como `unhealthy` con postgres parado | ADR-003; ADR-006 |
 | RT-017 | **Docker con las apps reales:** perfil `apps` con `api` y `web` en `healthy` y recarga en caliente; etapa `prod` construible y sin root | `docker compose --profile apps up -d` → `healthy`; `whoami` ≠ `root` en `prod` | ADR-003 |
@@ -51,6 +51,7 @@ No son requisitos de producto: son las condiciones técnicas que el login y la D
 | RT-019 | **E2E con Playwright:** un E2E por escenario Gherkin nombrado con su `CA-xxx`/`CB-xxx`, Page Objects, `data-testid` o roles, datos en `fixtures/`, máximo 1 reintento solo en CI y prueba que pasa al reintentar reportada como «inestable», informe HTML | `pnpm test:e2e` en verde; el informe agrupa por ID | ADR-006 (E2E); DoD |
 | RT-020 | **CI** en GitHub Actions en cada PR a `main` y en cada push a `main`: instalación congelada, lint, typecheck, pruebas con cobertura (con PostgreSQL), build, `contract:check`, migraciones inmutables y sobre BD vacía, gitleaks sobre todos los commits del PR, `pnpm audit --audit-level high` y E2E | Pipeline en verde en el PR; un paso fallido marca el PR en rojo con el nombre del paso | CLAUDE.md (Seguridad: escaneo en CI); ADR-008 |
 | RT-021 | **Presupuesto web de la pantalla de login:** LCP ≤ 2,5 s, INP ≤ 200 ms, CLS ≤ 0,1, JS inicial ≤ 200 KB gzip; respuesta del login ≤ 1 s (p95) | Lighthouse (perfil móvil) anotado en el PR; prueba de integración que mide la duración del login con los parámetros de producción del hash | RNF Rendimiento; ADR-006 (Web) |
+| RT-022 | **IP del cliente no suplantable y confianza web → API** (ADR-011): (a) la web **nunca** reenvía el `X-Forwarded-For` que recibe; resuelve la IP del cliente con `WEB_TRUST_PROXY_HOPS` (la entrada `n`-ésima por la derecha de `X-Forwarded-For`, con la misma semántica que `trust proxy` de Express) y, si `WEB_TRUST_PROXY_HOPS = 0` o la cabecera falta o no es una IP válida, no envía IP; (b) la web la manda en `X-Perchados-Client-Ip` junto con `X-Perchados-Internal-Token` = `INTERNAL_API_SECRET`; (c) la API solo usa `X-Perchados-Client-Ip` como rastreador del límite si el token coincide (comparación en tiempo constante) y el valor es una IP válida; en cualquier otro caso usa `req.ip` (según `TRUST_PROXY`) e ignora la cabecera; (d) la API no confía en la web por red: `TRUST_PROXY` solo describe el proxy de borde que hay delante de la API; (e) con `APP_ENV=production`, `TRUST_PROXY ≠ false` y `WEB_TRUST_PROXY_HOPS ≥ 1` son obligatorias; (f) `X-Perchados-Internal-Token` se oculta en los logs y no se documenta en OpenAPI | **API, integración:** sin token o con token incorrecto, `X-Perchados-Client-Ip` se ignora (el cubo es el de `req.ip`); con token válido, IP A agota su cubo (N+1 → 429) y IP B, por el mismo socket, sigue en 200; valor no IP con token válido → se usa `req.ip`; el token no aparece en stdout. **API, unitarias de configuración:** falta `INTERNAL_API_SECRET` o < 32 caracteres → inválida; `production` con `TRUST_PROXY=false` → inválida. **Web, unitarias:** `resolveClientIp` con saltos 0, 1 y 2 y cabeceras ausentes, vacías, con espacios o no IP; `createServerApiClient` no reenvía `X-Forwarded-For`, envía las dos cabeceras solo con IP resuelta y siempre el token; la configuración de la web rechaza `production` con `WEB_TRUST_PROXY_HOPS=0`; el módulo es `server-only` (el secreto no llega al *bundle* del navegador) | Revisión etapa 6 (DoS del panel); ADR-006 (API: límite por IP); OWASP A04/A05 |
 
 ## Cobertura de requisitos
 | RF / CB | Cómo se resuelve | Hito |
@@ -174,15 +175,55 @@ packages/
 
 ### Reutilización
 El registro de componentes está vacío: no hay nada que reutilizar. Lo siguiente se **registra** en `specs/02-memoria/registro-componentes.md` en la tarea que lo crea:
-- **API:** `ProblemException`, `ProblemDetailsFilter`, `ZodValidationPipe`/`@ZodBody`, `PrismaService`, `Clock`, `PasswordHasher`, `OpenSession`/`ValidateSession`/`RevokeSession`, `@Public`, `@Roles`, `@CurrentSession`, `@StrictRateLimit`, el *runner* de semillas y `createTestApp`.
+- **API:** `ProblemException`, `ProblemDetailsFilter`, `ZodValidationPipe`/`@ZodBody`, `PrismaService`, `Clock`, `PasswordHasher`, `OpenSession`/`ValidateSession`/`RevokeSession`, `@Public`, `@Roles`, `@CurrentSession`, `@StrictRateLimit`, `resolveTrackerIp` (RT-022), el *runner* de semillas y `createTestApp`.
+- **Web (servidor):** `resolveClientIp` y `createServerApiClient` (RT-022).
 - **Paquetes:** `problemSchema`, `PROBLEM_TYPES`, `usernameSchema`, `passwordInputSchema`, `createApiClient`.
 - **UI y pruebas:** `Button`, `TextField`, `PasswordField`, `Link`, `Alert`, `BasePage`, `LoginPage`, `PanelPage` y el fixture `test` con `accounts`.
 
 ### Topología web ↔ API y sesión (ADR-007)
-- **Navegador → API directo** (`API_PUBLIC_URL`, CORS con credenciales). La API ve la IP real para el límite de peticiones.
-- **Servidor Next → API** por `API_INTERNAL_URL`, reenviando `Cookie`, `X-Correlation-Id` y `X-Forwarded-For`.
+- **Navegador → API directo** (`API_PUBLIC_URL`, CORS con credenciales). La API obtiene la IP del cliente con `TRUST_PROXY` (el proxy de borde que tenga delante).
+- **Servidor Next → API** por `API_INTERNAL_URL` (red privada), reenviando `Cookie` y `X-Correlation-Id` (si es válido) y añadiendo `X-Perchados-Internal-Token` y, si se resolvió, `X-Perchados-Client-Ip` (RT-022). **Nunca** reenvía el `X-Forwarded-For` recibido.
 - `API_PUBLIC_URL` se lee en tiempo de ejecución en `layout.tsx` y se pasa al cliente con `ApiConfigProvider` (sin `NEXT_PUBLIC_*`).
-- **Cookies:** `perchados_sid` (HttpOnly) y `perchados_csrf` (legible por JS), ambas `SameSite=Strict`. En local `localhost:3000` y `localhost:3001` comparten cookies. En producción web y API comparten dominio registrable (`SESSION_COOKIE_DOMAIN`) y las cookies llevan el prefijo `__Secure-`.
+- **Cookies:** `perchados_sid` (HttpOnly) y `perchados_csrf` (legible por JS), ambas `SameSite=Strict`. En local `localhost:3000` y `localhost:3001` comparten cookies. En producción web y API comparten dominio registrable (`SESSION_COOKIE_DOMAIN`) y las cookies llevan el prefijo `__Secure-`. Los nombres (`SESSION_COOKIE_NAME`, `CSRF_COOKIE_NAME`, `SECURE_COOKIE_PREFIX` y los compuestos `SECURE_*`) se exportan desde `packages/contracts` (`auth/cookie-names.ts`) y ni la API ni la web los repiten.
+
+### IP del cliente y límite de peticiones en las llamadas SSR (ADR-011)
+**Problema (revisión de la etapa 6):** el servidor Next reenviaba el `X-Forwarded-For` del cliente tal cual. Con `TRUST_PROXY=false` todas las llamadas SSR (`getSession`/`requireAdminSession`, una por carga de `/login` y de `/panel`) caían en el cubo global de la IP del servidor web: unas 100 cargas/min de `/login` por cualquiera daban 429 al panel y expulsaban al administrador. Confiar en la cabecera sin más dejaría que el atacante eligiera su IP.
+
+**Hechos que condicionan la solución:**
+- Next.js (servidor Node) rellena `x-forwarded-for` con la dirección del socket **solo si no viene** (`??=`); si el cliente la envía, se conserva. Y `NextRequest` ya no expone `ip`. Por tanto, **sin un proxy de borde que escriba la cabecera, la web no puede conocer la IP real** cuando el cliente manda una falsa. Se verifica con Context7 en la tarea de implementación.
+- La API no puede distinguir por red a la web del navegador en todos los entornos (en Docker Desktop el tráfico publicado llega desde la pasarela de la red de Docker, la misma subred que la web).
+
+**Solución:**
+1. **Web:** `resolveClientIp(xff, WEB_TRUST_PROXY_HOPS)` en `apps/web/src/shared/api/client-ip.ts` (`server-only`). Con `n ≥ 1` saltos de confianza delante de la web, la IP del cliente es la entrada `n`-ésima por la derecha de `X-Forwarded-For` (la que escribió el borde); con `n = 0`, o si la entrada no existe o no es IP (`net.isIP`), no hay IP.
+2. **Web → API:** `createServerApiClient` envía `X-Perchados-Internal-Token: <INTERNAL_API_SECRET>` siempre y `X-Perchados-Client-Ip: <ip>` solo si se resolvió. Deja de reenviar `X-Forwarded-For`.
+3. **API:** `RateLimitGuard.getTracker()` usa `resolveTrackerIp(req)` (`apps/api/src/shared/rate-limit/client-ip.ts`): si el token coincide (`timingSafeEqual` sobre SHA-256 de ambos valores) **y** `X-Perchados-Client-Ip` es una IP válida, la usa; en otro caso, `req.ip`. Se mantiene la agrupación IPv6 por /64. El token no da ningún otro privilegio: no exime de límites, ni de sesión, ni de CSRF.
+4. **Cubo:** las llamadas SSR cuentan en el **cubo global de la IP del cliente final**, el mismo que sus llamadas directas del navegador. No hay exención ni cubo especial: quien recarga `/login` en bucle agota su propio cubo, no el del administrador.
+5. **Sin IP resuelta** (solo posible con `WEB_TRUST_PROXY_HOPS = 0`, que la configuración prohíbe en producción): la API usa `req.ip` (la IP de la web), como hasta ahora. Es aceptable en local, Docker y CI, donde no hay atacantes externos.
+
+**Configuración coherente por entorno:**
+
+| Entorno | Delante de la web | `WEB_TRUST_PROXY_HOPS` | Delante de la API | `TRUST_PROXY` | IP que cuenta en SSR |
+|---------|-------------------|------------------------|-------------------|---------------|----------------------|
+| Local (`pnpm dev`) | Nada | `0` | Nada | `false` | La de la web (`127.0.0.1`) |
+| Docker (perfil `apps`, puertos en `127.0.0.1`) | Nada | `0` | Nada | `false` | La del contenedor `web` |
+| CI (`APP_ENV=ci`) | Nada | `0` | Nada | `false` | La de la web; los saltos ≥ 1 se prueban en unitarias e integración |
+| Producción | Proxy de borde con TLS (1 salto) que **añade** la dirección del par TCP a `X-Forwarded-For` | `1` (o los saltos reales) | El mismo borde | `1` o el CIDR del borde | La del cliente final |
+
+**Condiciones del despliegue en producción** (el despliegue está `[POR ACLARAR]` en `stack.md`; quedan como restricción para la futura CD, igual que el dominio registrable de ADR-007): web y API solo alcanzables a través del borde (sus puertos no se publican fuera de la red privada); `API_INTERNAL_URL` apunta a la red privada; `INTERNAL_API_SECRET` aleatorio de ≥ 32 caracteres, igual en web y API, solo en el entorno; rotarlo exige reiniciar ambas.
+
+### Excepción a RT-004: esquemas de navegador (ADR-012)
+RT-004 dice que los esquemas viven una sola vez. `packages/contracts` mantiene **dos juegos** de esquemas de las credenciales:
+- **Zod clásico** (`@perchados/contracts`): API, validación de entrada y OpenAPI.
+- **zod/mini** (`@perchados/contracts/client`, `login.client-schemas.ts`): solo para el navegador, por el presupuesto de JS de RT-021 (el JS inicial de `/login` bajó de 239,5 a unos 162 KB gzip).
+
+Condiciones de la excepción (todas obligatorias; el `revisor` las comprueba):
+1. **Fuente única de reglas y mensajes:** longitudes, patrón y textos solo en `auth/login.rules.ts` (`USERNAME_MAX_LENGTH`, `PASSWORD_MIN_LENGTH`, `PASSWORD_MAX_LENGTH`, `USERNAME_PATTERN_SOURCE`, `CREDENTIAL_MESSAGES`); ninguno de los dos juegos declara literales propios.
+2. **Prueba de paridad obligatoria** (`login.client-schemas.spec.ts`): cada esquema de `/client` da el mismo resultado (éxito, valor normalizado y mensajes de error) que su homólogo clásico sobre el mismo conjunto de casos, incluidos los bordes. Un esquema nuevo en `/client` sin su caso de paridad no se acepta.
+3. **El código de navegador solo importa `@perchados/contracts/client`.** Regla simple y comprobable: todo `apps/web/src/**` importa solo `/client` (hoy ya es así) y un `no-restricted-imports` en `apps/web/eslint.config.mjs` hace fallar `lint` si importa la entrada principal; las pruebas E2E (`apps/web/e2e/**`, Node) y la API pueden usar la entrada principal.
+4. `/client` solo contiene lo que el navegador necesita (esquemas de formularios, nombres de cookies y de cabeceras, tipos); nunca el registro OpenAPI.
+
+### Calibración de argon2id (ADR-007)
+ADR-007 fijó `t=4` como valor inicial y pidió calibrar en el hito 2 para que una verificación tarde entre 100 y 500 ms. Calibración del 2026-10 en el equipo de desarrollo: **`m=19456 KiB, t=10, p=1`** → `bench:hash` mediana ≈ 160–210 ms; login completo mediana ≈ 213–225 ms y p95 ≈ 336–499 ms (dentro del ≤ 1 s p95 de RT-021). Son los valores por defecto de `env.schema.ts` y de `.env.example`. **Se recalibra con `bench:hash` en el hardware de producción** antes del primer despliegue (ajustando solo `PASSWORD_HASH_ITERATIONS`, nunca por debajo de la tabla mínima de ADR-007); los hashes existentes se rehashean solos tras un login correcto si los nuevos parámetros son superiores.
 
 ### Flujo de login (`LogIn`, API)
 1. Validar `LoginRequest` (contrato). Inválido → 400, **sin contar intento**.
@@ -286,12 +327,15 @@ Esquemas en `packages/contracts` (objetos estrictos), registrados en `v1/registr
 | `auth/csrf-invalid` | 403 | Falta el token CSRF, no coincide u `Origin` no permitido |
 | `not-found` | 404 | Ruta inexistente (incluida cualquier ruta fuera de `/v1`) |
 | `payload-too-large` | 413 | Cuerpo > `BODY_LIMIT_KB` (100) |
+| `request-rejected` | 4xx (el de la excepción; 400 por defecto) | `HttpException` 4xx sin tipo propio (405, 406, 415…); título y detalle genéricos del catálogo, nunca el mensaje original; log `warn` |
 | `auth/account-locked` | 423 | Cuenta (o usuario inexistente imitado) bloqueada; extensión `lockedMinutesRemaining` (entero ≥ 1) |
 | `rate-limit-exceeded` | 429 | Límite superado (+ `Retry-After`) |
 | `internal-error` | 500 | Error no controlado; `detail` genérico |
 | `health/unavailable` | 503 | La BD no responde |
 
-**Cabeceras:** petición `X-Correlation-Id` (opcional) y `X-CSRF-Token`; respuesta `X-Correlation-Id`, `Retry-After` (429) y `Cache-Control: no-store`. CORS expone `X-Correlation-Id` y `Retry-After`.
+**Cuerpos:** la API solo acepta JSON: se registra únicamente el parser JSON (`bodyParser: false` + `json({ limit })`, sin `urlencoded`), porque no consume formularios.
+
+**Cabeceras:** petición `X-Correlation-Id` (opcional) y `X-CSRF-Token`; internas web → API `X-Perchados-Internal-Token` y `X-Perchados-Client-Ip` (RT-022; no forman parte del contrato público ni de OpenAPI, y la API las ignora sin el token correcto); respuesta `X-Correlation-Id`, `Retry-After` (429) y `Cache-Control: no-store`. CORS expone `X-Correlation-Id` y `Retry-After`.
 
 ## Modelo de datos
 ```prisma
@@ -374,11 +418,13 @@ model RateLimitCounter {
 | `APP_ENV` | api, web | `development \| test \| ci \| production`; gobierna los interruptores de seguridad |
 | `LOG_LEVEL` | api | `fatal…trace`, por defecto `info` |
 | `CORS_ALLOWED_ORIGINS` | api | Lista de URLs; obligatoria |
-| `TRUST_PROXY` | api | `false` \| número de saltos \| lista de CIDR; por defecto `false` |
+| `TRUST_PROXY` | api | `false` \| número de saltos \| lista de CIDR; por defecto `false`. Describe **solo** el proxy de borde delante de la API, nunca la web. Con `APP_ENV=production`, `false` → inválida (RT-022) |
+| `WEB_TRUST_PROXY_HOPS` | web | Entero ≥ 0, por defecto `0`; saltos de confianza delante de la web. Con `APP_ENV=production`, `0` → inválida (RT-022) |
+| `INTERNAL_API_SECRET` | api, web | Obligatoria, ≥ 32 caracteres, mismo valor en ambas; sin valor por defecto (`.env.example` lo deja vacío e indica generarlo con `openssl rand -base64 32`); la CI genera uno por ejecución. Se oculta en los logs (RT-006) |
 | `BODY_LIMIT_KB` | api | 100 |
 | `SESSION_COOKIE_DOMAIN` | api | Opcional; obligatoria con `APP_ENV=production` |
 | `RATE_LIMIT_GLOBAL_PER_MIN`, `RATE_LIMIT_AUTH_PER_MIN` | api | 100 / 10; enteros > 0 |
-| `PASSWORD_HASH_MEMORY_KIB`, `PASSWORD_HASH_ITERATIONS`, `PASSWORD_HASH_PARALLELISM` | api | 19456 / 4 / 1; por debajo del mínimo OWASP → inválida |
+| `PASSWORD_HASH_MEMORY_KIB`, `PASSWORD_HASH_ITERATIONS`, `PASSWORD_HASH_PARALLELISM` | api | 19456 / 10 / 1 (calibrados; ver «Calibración de argon2id»); por debajo del mínimo OWASP → inválida |
 | `HEALTH_DB_TIMEOUT_MS` | api | 2000 (≤ 2500) |
 | `API_INTERNAL_URL`, `API_PUBLIC_URL` | web | URLs obligatorias |
 
@@ -392,6 +438,8 @@ Disparadores: `pull_request` hacia `main` y `push` a `main`; `concurrency` por r
 | `calidad` | Instalar (`--frozen-lockfile`) → Lint → Typecheck → Pruebas con cobertura (*service* `postgres`) → Build → Verificar contrato → Migraciones inmutables → Migraciones sobre BD vacía (`db:migrate:deploy` dos veces + `migrate diff --exit-code`) | — |
 | `seguridad` | gitleaks (`fetch-depth: 0`, `--redact`, todos los commits del PR) → `pnpm audit --audit-level high` | — |
 | `e2e` | Build → API + web con `APP_ENV=ci` y BD migrada → Playwright (chromium escritorio + 360 px) → informe HTML como artefacto | `calidad` |
+
+**Excepciones del audit (2026-10-16):** el job `seguridad` ejecuta `pnpm audit --audit-level high`. Excepción GHSA-vfj7-8cjw-p6xm (`braces`, solo dev, sin parche) aprobada por Harold el 2026-10-16, a revisar el 2026-11-16 (ver `.github/audit-exceptions.md`). Parches forzados con `pnpm.overrides`: `deepmerge-ts` 8.0.0 y `mysql2` 3.22.0.
 
 Protección de rama (la configura el dueño en GitHub): `calidad`, `seguridad` y `e2e` obligatorios.
 
@@ -411,6 +459,14 @@ Protección de rama (la configura el dueño en GitHub): `calidad`, `seguridad` y
 | Skills (ADR-004) | Se crean `api-rest-conventions` y `prisma-datos` | Ninguno |
 | `CLAUDE.md` raíz | Propuesta de comandos (BD, contrato, E2E) para que la aplique el orquestador | Ninguno |
 | Specs `000-estructura-monorepo` y `002-fundaciones` | Sustituidas por esta funcionalidad; el orquestador las elimina (respaldo en 84c8856) | Ninguno |
+| **Revisión de la etapa 6 (2026-10-18)** — `apps/web/src/shared/api/server-client.ts` | Deja de reenviar `X-Forwarded-For`; añade `X-Perchados-Internal-Token` y `X-Perchados-Client-Ip` con el nuevo `client-ip.ts` (RT-022). Se actualiza su prueba | Medio: toca la sesión del panel (revisión humana) |
+| `apps/api/src/shared/rate-limit/` | `RateLimitGuard.getTracker()` con `resolveTrackerIp`; nuevas integraciones de RT-022. Las pruebas existentes de `TRUST_PROXY` (`rate-limit.integration.spec.ts`, `rate-limit.trust-proxy.integration.spec.ts`) siguen válidas | Medio: límite de peticiones (revisión humana) |
+| `apps/api/src/shared/config/env.schema.ts`, `apps/web/src/shared/config/server-env.ts` | `INTERNAL_API_SECRET`, `WEB_TRUST_PROXY_HOPS` y las reglas de producción | Bajo: un entorno sin el secreto deja de arrancar (falla rápido y nombra la variable) |
+| `apps/api/src/shared/logging/sanitize.ts` | Oculta `x-perchados-internal-token` | Bajo |
+| `packages/contracts` (`/client`) | Constantes de los nombres de las dos cabeceras internas | Bajo |
+| `apps/web/eslint.config.mjs` | `no-restricted-imports` de la entrada principal de `@perchados/contracts` en `src/**` (ADR-012) | Bajo: hoy ningún archivo de `src` la importa |
+| `.env.example`, `docker-compose.yml`, `.github/workflows/ci.yml`, `apps/api/test/helpers/test-app.factory.ts` | Las dos variables nuevas; compose las pasa a `api` y `web` (el secreto con `${INTERNAL_API_SECRET:?…}`); la CI genera el secreto en el job `e2e`; `createTestApp` usa un secreto de prueba | Bajo: el desarrollador debe poner el secreto en su `.env` una vez |
+| `.claude/skills/api-rest-conventions/SKILL.md` | La nota de `TRUST_PROXY` pasa a enlazar ADR-011 (lo aplica el orquestador) | Ninguno |
 
 No hay código de aplicación previo: no hay riesgo de regresión funcional. **Esta funcionalidad sí crea infraestructura:** es la excepción explícita del dueño a la regla de «una rebanada no crea infraestructura» (ADR-010). Las funcionalidades siguientes vuelven a reutilizarla sin crear infraestructura nueva.
 
@@ -418,7 +474,10 @@ No hay código de aplicación previo: no hay riesgo de regresión funcional. **E
 - **ADR-007 (aceptada):** sesión en servidor con cookie opaca, argon2id, CSRF sincronizador + `Origin`, topología de cookies.
 - **ADR-008 (aceptada):** pino, configuración con Zod, `zod-to-openapi` + `openapi-typescript` + `openapi-fetch`, Vitest, `@nestjs/throttler` con almacén PostgreSQL, gitleaks y `pnpm audit`.
 - **ADR-009 (aceptada):** `ui-tokens` → variables CSS, CSS Modules, HTML nativo, Plus Jakarta Sans e IBM Plex Mono, axe en Vitest y en Playwright. Aquí solo se construyen los 5 componentes que usa el login.
-- **ADR-010 (propuesta, nueva):** la base técnica forma parte de la primera funcionalidad; se deroga la regla de capas horizontales como funcionalidades separadas.
+- **ADR-010 (aceptada):** la base técnica forma parte de la primera funcionalidad; se deroga la regla de capas horizontales como funcionalidades separadas.
+- **ADR-011 (propuesta, nueva):** IP del cliente resuelta en el borde, web → API con secreto interno y sin confianza por red; las SSR cuentan en el cubo del cliente.
+- **ADR-012 (propuesta, nueva):** esquemas de navegador con zod/mini en `@perchados/contracts/client` como excepción acotada a «los esquemas viven una sola vez».
+- **Calibración de argon2id (`t=10`):** aplica lo que ADR-007 ya preveía (calibrar en el hito 2); no necesita ADR.
 - **Decisiones locales (sin ADR):**
   - **Imitación del bloqueo para usuarios inexistentes** (`login_attempt_unknown`): RF-008 exige avisar del bloqueo y CB-004 exige no revelar que un usuario no existe. Sin imitación, 5 fallos con un nombre distinguirían una cuenta real («bloqueada») de una inexistente (seguiría «incorrectos»). La tabla no es una cuenta: no se puede iniciar sesión con ella.
   - **423 `auth/account-locked`** en lugar de 429, para no confundirlo con el límite de peticiones por IP.
@@ -431,13 +490,13 @@ No hay código de aplicación previo: no hay riesgo de regresión funcional. **E
 - Solo componentes de `ui-web`; nada de estilos ad hoc fuera de los tokens.
 - **WCAG 2.2 AA:** `<main>`, `<h1>` único, `<aside>` decorativo; etiquetas visibles; errores asociados y anunciados; aviso de Bloq Mayús y carga anunciados; control mostrar/ocultar con nombre; foco visible; contraste calculado; pegar y gestores de contraseñas permitidos (3.3.8); área táctil ≥ 24 px.
 - **Responsive:** 360 px → escritorio, mobile-first, formulario primero en pantallas estrechas.
-- **Presupuesto (RT-021):** la pantalla de login es un Server Component con una única isla cliente (`LoginForm`); el panel de marca son SVG estáticos con tamaño declarado (sin CLS); fuentes autoalojadas con `size-adjust`; sin librerías de UI ni CSS-in-JS; `openapi-fetch` ≈ 6 KB. Objetivo JS inicial de `/login` < 120 KB gzip.
+- **Presupuesto (RT-021):** la pantalla de login es un Server Component con una única isla cliente (`LoginForm`); el panel de marca son SVG estáticos con tamaño declarado (sin CLS); fuentes autoalojadas con `size-adjust`; sin librerías de UI ni CSS-in-JS; `openapi-fetch` ≈ 6 KB; esquemas del formulario con zod/mini (ADR-012). **Medido: ≈ 162 KB gzip** (de 239,5 antes de zod/mini), dentro del límite de 200 KB de RT-021, que es el que obliga.
 - **CSP con nonce** en `proxy.ts`: `default-src 'self'; script-src 'self' 'nonce-…' 'strict-dynamic'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self' <API_PUBLIC_URL>; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none'` (`'unsafe-eval'` solo en desarrollo). Más HSTS, `nosniff`, `Referrer-Policy: strict-origin-when-cross-origin` y `Permissions-Policy: camera=(), microphone=(), geolocation=()`.
 
 **API**
 - Contrato en `packages/contracts` → `openapi/v1.json`; rutas `/v1`; errores del catálogo anterior.
 - **Migraciones:** las 3 descritas.
-- **Rate limits:** 100/min por IP global; 10/min por IP adicional en `POST /v1/auth/login` (y `logout`); `/v1/health` exento. La protección por cuenta es el bloqueo de 5 fallos/30 min.
+- **Rate limits:** 100/min por IP global; 10/min por IP adicional en `POST /v1/auth/login` (y `logout`); `/v1/health` exento. La protección por cuenta es el bloqueo de 5 fallos/30 min. La IP es la del cliente final también en las llamadas SSR de la web (RT-022, ADR-011).
 - Cabeceras con helmet (RT-015).
 
 **Móvil:** no aplica (el panel es solo web).
@@ -445,7 +504,8 @@ No hay código de aplicación previo: no hay riesgo de regresión funcional. **E
 **Integraciones:** no aplica. La única dependencia en tiempo de ejecución es PostgreSQL: tiempo máximo de conexión de 2 s en el *pool* y `HEALTH_DB_TIMEOUT_MS`. Alertas aplazadas (decisión del dueño); los errores se registran en nivel `error` con `correlationId`.
 
 ## Seguridad y privacidad
-- **A01:** todo privado por defecto; `@Public` solo en `health`, `auth/login` y `auth/logout`, con una prueba de lista blanca. El panel se comprueba en el servidor de Next y en la API.
+- **A01:** todo privado por defecto; `@Public` solo en `health`, `auth/login` y `auth/logout`, con una prueba de lista blanca. Toda ruta privada lleva `@Roles(...)` salvo una segunda lista blanca (hoy solo `GET /v1/auth/session`, que cualquier sesión válida puede consultar y cuya respuesta la web compara con `admin`), también con su prueba. El panel se comprueba en el servidor de Next y en la API.
+- **A04/A05 — IP del cliente (RT-022):** ninguna cabecera del cliente decide la IP salvo la que escribe un proxy de borde de confianza; la web solo transmite la IP con el secreto interno, que no concede otro privilegio.
 - **A02:** argon2id ≥ OWASP; token de sesión de 256 bits guardado como SHA-256; cookies `Secure` fuera de local; HSTS.
 - **A03:** Zod en el borde; Prisma parametrizado; el SQL crudo (contador atómico y UPSERT del limitador) con plantillas etiquetadas de `$executeRaw`/`$queryRaw`.
 - **A05:** CORS cerrado, cabeceras de seguridad, errores sin trazas.
@@ -453,7 +513,7 @@ No hay código de aplicación previo: no hay riesgo de regresión funcional. **E
 - **A09 — Auditoría** (RNF «intentos fallidos y bloqueos registrados para el responsable»): eventos de log JSON `auth.login.succeeded` (`info`), `auth.login.failed` (`warn`, con `reason: invalid-password | unknown-user | not-admin | disabled`), `auth.login.locked` (`warn`) y `auth.logout` (`info`), con `accountId` cuando existe y `correlationId`. **Nunca** se registra el usuario tecleado (podría ser una contraseña escrita en el campo equivocado) ni la contraseña. Ver «Preguntas para el dueño».
 - **Secretos:** solo en el entorno; gitleaks en la CI; la semilla no imprime valores; la configuración inválida nombra la variable, nunca el valor. Ningún agente lee ni escribe el valor de `ADMIN_INITIAL_PASSWORD`.
 - **Datos personales:** la sesión no guarda IP ni *user agent* (minimización).
-- ⚠️ **Revisión humana obligatoria** en el hito 2 y en el PR completo: `apps/api/src/modules/auth/**`, `apps/api/src/modules/users/**`, `apps/api/src/shared/{rate-limit,http}/**`, `apps/web/src/shared/auth/**` y `apps/web/src/proxy.ts`.
+- ⚠️ **Revisión humana obligatoria** en el hito 2 y en el PR completo: `apps/api/src/modules/auth/**`, `apps/api/src/modules/users/**`, `apps/api/src/shared/{rate-limit,http}/**`, `apps/web/src/shared/auth/**`, `apps/web/src/shared/api/**` y `apps/web/src/proxy.ts`.
 
 ## Estrategia de pruebas
 | Nivel | Herramienta | Qué cubre |
@@ -465,6 +525,8 @@ No hay código de aplicación previo: no hay riesgo de regresión funcional. **E
 | Unitarias UI | Vitest + Testing Library + `user-event` + `vitest-axe` | Los 5 componentes en cada estado; `LoginForm`: CA-002, CA-004, CA-005, CA-006, CA-009, CA-013, CA-014, CA-015, CB-007, CB-008, CB-009; `use-caps-lock`; textos sin credenciales (RF-022) |
 | Tokens | Vitest + Stylelint | Pares de contraste; solo tokens |
 | E2E | Playwright + `@axe-core/playwright` | Un test por escenario Gherkin de la spec (CA-001 a CA-019, nombrados con su ID) y CB-001, CB-002, CB-007, CB-011, CB-017, CB-018; axe en `/login` (todos sus estados) y `/panel`; 360 px, zoom del 200 % y `forcedColors` |
+| RT-022 (revisión etapa 6) | Vitest (API: integración con `createTestApp`; web: unitarias) | API: token ausente/incorrecto → cabecera ignorada; token válido → cubos independientes por `X-Perchados-Client-Ip` (A agota con N+1 → 429, B sigue en 200 por el mismo socket); valor no IP → `req.ip`; token oculto en stdout; configuración (`INTERNAL_API_SECRET`, `production` + `TRUST_PROXY=false`). Web: `resolveClientIp` (0/1/2 saltos, ausente, vacío, espacios, no IP, IPv6); `createServerApiClient` sin `X-Forwarded-For` y con las cabeceras internas; `server-env` (`production` + `WEB_TRUST_PROXY_HOPS=0`). Nombrar las pruebas `RT-022` |
+| ADR-012 | Vitest + ESLint | Paridad `/client` ↔ clásico (ya existe; obligatoria para todo esquema nuevo de `/client`); un archivo de muestra en `apps/web/src` que importa la entrada principal hace fallar `lint` |
 | Docker y CI (comprobación manual en el PR del hito 1) | Docker y GitHub Actions | RT-017 y RT-020 (PR de demostración con error de tipos, secreto de prueba y migración alterada, cerrados sin fusionar) |
 
 - **Datos de prueba:** cuentas de prueba (p. ej. «lucia», un usuario sin rol `admin`) creadas por factories en `apps/api/test/helpers/db.ts` y `apps/web/e2e/fixtures/accounts.ts`, con contraseñas de prueba definidas en el fixture (no son secretos). Para CA-016 y CA-018 los fixtures mueven `locked_until` y `expires_at` en la BD de prueba; no se espera tiempo real.
@@ -482,6 +544,10 @@ No hay código de aplicación previo: no hay riesgo de regresión funcional. **E
 | Escritura en PostgreSQL por petición limitada e intentos de usuarios inexistentes | Volumen del MVP bajo; 10/min por IP en auth; limpieza oportunista |
 | Web y API en dominios registrables distintos romperían `SameSite=Strict` | Restricción documentada en ADR-007; el despliegue queda fuera de alcance |
 | La contraseña inicial se compartió por chat | Se lee solo del entorno; la spec exige cambiarla antes de producción |
+| El proxy de borde de producción no añade `X-Forwarded-For` o la API/web quedan publicadas sin pasar por él (IP suplantable o cubo compartido) | Condiciones del despliegue en «IP del cliente…»; la configuración de producción exige `TRUST_PROXY ≠ false` y `WEB_TRUST_PROXY_HOPS ≥ 1`; queda como restricción para la CD |
+| Fuga de `INTERNAL_API_SECRET` | Solo permite elegir la IP del límite (no da sesión, rol ni exención); módulo `server-only`, oculto en logs, rotación reiniciando web y API |
+| Deriva entre los esquemas zod y zod/mini | Fuente única `login.rules.ts` + prueba de paridad + regla de lint (ADR-012) |
+| Los parámetros de argon2id calibrados en desarrollo son lentos o rápidos en producción | Recalibrar con `bench:hash` en el hardware de producción antes del primer despliegue |
 
 ## Fuera de alcance de esta funcionalidad
 Recortado de las antiguas 000 y 002 por no aportar al login ni a la DoD:
@@ -497,7 +563,19 @@ Recortado de las antiguas 000 y 002 por no aportar al login ni a la DoD:
 - La app móvil, Maestro, el almacenamiento de imágenes, la pasarela de pagos, el despliegue (CD), las alertas, la purga de sesiones caducadas, el MCP de PostgreSQL y las pruebas visuales de regresión.
 - Todo lo listado en «Fuera de alcance» de la spec.
 
+## Ajustes aplicados en la revisión de la etapa 6 (2026-10-18)
+No cambian requisitos; se dejan constancia y su encaje en el diseño:
+- **`request-rejected`** como tipo de problema para los 4xx no mapeados: añadido al catálogo `PROBLEM_TYPES`. Amplía el catálogo, no lo contradice.
+- **API solo JSON** (sin `urlencoded`): anotado en «Contratos de API». Coherente con «Zod en el borde».
+- **`@Roles` en toda ruta privada salvo lista blanca** (`GET /v1/auth/session`): anotado en A01. Refuerza RT-013 con una segunda lista blanca y su prueba.
+- **Evento `auth.logout`**: ya figuraba en A09; el código no lo emitía. Sin contradicción.
+- **Nombres de cookie exportados desde contracts:** anotado en «Topología web ↔ API». Sin contradicción.
+- **Puertos de Docker en `127.0.0.1`:** todos los puertos publicados de compose (postgres, storage, mailpit, api y web) se enlazan solo a `127.0.0.1`. Sin contradicción con ADR-003; además impide que otro equipo de la red local llegue a la API sin pasar por el navegador del desarrollador.
+- **Contradicciones encontradas en el diseño anterior y corregidas aquí:** (1) «Topología» decía que el servidor Next reenvía `X-Forwarded-For` (causa del hallazgo de DoS) → sustituido por RT-022; (2) RT-010 y «Configuración» decían `t=4` → `t=10` calibrado; (3) el objetivo interno «< 120 KB gzip» de `/login` no se cumple (≈ 162 KB) → se deja constancia; el límite que obliga es el de 200 KB de RT-021.
+
 ## Preguntas para el dueño (no bloquean el diseño)
+- **Proxy de borde de producción (resuelto 2026-10-18):** el dueño acepta como restricción para la futura CD un borde con TLS que añade `X-Forwarded-For` y deja web y API alcanzables solo a través de él (RT-022, ADR-011).
+- **Objetivo de JS de `/login` (resuelto 2026-10-18):** el dueño retira el objetivo interno de < 120 KB gzip; obliga el límite de 200 KB de RT-021 (medido ≈ 162 KB).
 - **Textos no definidos en la spec:** 429 (límite por IP) y error inesperado (5xx). Se proponen los de «Pantalla de login».
 - **Longitud máxima del usuario:** se propone 64 letras como límite técnico; la spec no fija un máximo.
 - **Registro de intentos para el responsable:** se resuelve con eventos de log de auditoría (sin el usuario tecleado). Si el responsable necesita consultarlos desde una pantalla o recibirlos por otro medio, sería otra funcionalidad.

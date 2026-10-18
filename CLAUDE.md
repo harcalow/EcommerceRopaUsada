@@ -120,7 +120,7 @@ Una tarea o funcionalidad está terminada solo si:
 - **Comunes:** `protocolo-subagente`, `memoria-engram`.
 - **De conocimiento:** `dominio-ropa-usada`, `redaccion-specs`, `decisiones-arquitectura`, `estrategia-entrega`, `revision-seguridad`, `requisitos-plataforma`.
 - **De convenciones por tecnología:** primero las oficiales, luego las propias (catálogo en ADR-004):
-  - `nestjs-hexagonal` para `apps/api`.
+  - `nestjs-hexagonal`, `api-rest-conventions` y `prisma-datos` para `apps/api`.
   - `nextjs-app-router` para `apps/web`.
   - `expo-router-mvvm` para `apps/mobile`.
   - `docker-dev` para Docker y la infraestructura local.
@@ -149,15 +149,21 @@ specs/
 
 ## Estado actual
 
-- Stack, entorno, equipo y requisitos por plataforma propuestos en ADR-001 a ADR-006, pendientes de aceptación.
-- Única funcionalidad: `001-login-administrador` (spec y diseño aprobados, incluye la base técnica; siguiente paso `/implementar 001`). Visión de producto pendiente.
-- **Comandos**, siempre desde la raíz, con pnpm 10 y Node 24:
+- ADR-001 a ADR-010 aceptados.
+- Única funcionalidad: `001-login-administrador` (implementada, etapa 6: siguiente paso `/verificar 001`). Visión de producto pendiente.
+- **Comandos**, siempre desde la raíz, con pnpm 10 y Node 24. Docker corre dentro de WSL: `localhost:<puerto>` sirve desde Windows y los scripts leen el `.env` de la raíz.
 
   | Comando | Qué hace |
   |---------|----------|
-  | `pnpm infra:up` / `pnpm infra:down` | Levanta o para la infraestructura (Docker) |
-  | `docker compose --profile apps up -d` | Levanta además la api y la web |
-  | `pnpm dev`, `pnpm build`, `pnpm test`, `pnpm lint`, `pnpm typecheck`, `pnpm format` | Vía Turborepo; operativos tras las tareas de base de la 001 (T-01 en adelante) |
-- Requisitos del entorno:
-  - Instalado: Python 3.
-  - Pendientes: Node.js 24 LTS, Docker Desktop, Engram, `typescript-language-server` y la variable `GITHUB_PERSONAL_ACCESS_TOKEN`.
+  | `pnpm infra:up` / `pnpm infra:down` | Levanta o para postgres, storage (SeaweedFS) y mailpit |
+  | `pnpm db:migrate:deploy` | Aplica las migraciones (`pnpm db:migrate` crea una nueva en local; las ya fusionadas no se editan) |
+  | `pnpm db:seed` | Semilla idempotente (`HaroldAdmin`; requiere `ADMIN_INITIAL_PASSWORD`) |
+  | `pnpm dev` | Arranca api (3001) y web (3000) con recarga en caliente |
+  | `docker compose --profile apps up -d` | Alternativa: api y web en Docker |
+  | `pnpm test` | Pruebas unitarias y de integración (cada ejecución crea y borra su propia BD `*_test`) |
+  | `pnpm test:e2e` | E2E de Playwright; con la API real: `E2E_WITH_API=1 pnpm test:e2e` (BD `perchados_e2e` migrada) |
+  | `pnpm contract:generate` / `pnpm contract:check` | Regenera / verifica `openapi/v1.json` y los tipos de `api-client` |
+  | `pnpm ci:migrations --base <sha>` / `pnpm test:scripts` | Comprueba que las migraciones no se modifican / prueba los scripts de CI |
+  | `pnpm lint`, `pnpm typecheck`, `pnpm build`, `pnpm format` | Vía Turborepo |
+- Comandos largos con `timeout`; Vitest siempre con `run`; ningún servidor en primer plano (ver `protocolo-subagente`).
+- Entorno: Node 24, pnpm 10, Python 3, Engram, `typescript-language-server` y Docker Engine dentro de WSL (Ubuntu; recursos en `%USERPROFILE%\.wslconfig`). Pendiente: la variable `GITHUB_PERSONAL_ACCESS_TOKEN`.

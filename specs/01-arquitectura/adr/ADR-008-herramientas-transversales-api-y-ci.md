@@ -1,7 +1,7 @@
 ---
 id: ADR-008
 estado: aceptada   # propuesta | aceptada | reemplazada por ADR-XXX
-aprobacion: dueño (Harold) el 2026-10-15, aplicada por el orquestador con su autorización explícita en el chat
+aprobacion: dueño (Harold) el 2026-10-15; reaceptada el 2026-10-17 en el chat tras añadir la nota de excepciones del audit
 fecha: 2026-10-15
 ---
 
@@ -31,6 +31,8 @@ ADR-001 y ADR-006 fijan el marco (NestJS, Zod, OpenAPI, Vitest/Jest, GitHub Acti
 | Límite de peticiones | **`@nestjs/throttler` + almacén PostgreSQL propio** · almacén en memoria · Redis | La memoria se reinicia y no escala a varias réplicas (CB-022). Redis sería un servicio más en Docker. PostgreSQL ya existe: UPSERT atómico con la hora de la BD |
 | Secretos | **gitleaks (CLI)** · trufflehog · GitHub secret scanning | La CLI es gratuita, escanea todos los commits del PR y redacta la salida; la *action* oficial exige licencia en organizaciones |
 | Dependencias | **`pnpm audit --audit-level high`** + excepciones con caducidad · osv-scanner · Dependabot | Nativo de pnpm, sin herramientas extra. La caducidad de 30 días se valida con un script sobre `security/audit-exceptions.yaml` |
+
+**Excepciones del audit (2026-10-16):** el job `seguridad` ejecuta `pnpm audit --audit-level high`. Excepción GHSA-vfj7-8cjw-p6xm (`braces`, solo dev, sin parche) aprobada por Harold el 2026-10-16, a revisar el 2026-11-16 (ver `.github/audit-exceptions.md`; se usa `pnpm.auditConfig.ignoreGhsas` en lugar de `security/audit-exceptions.yaml`). Parches forzados con `pnpm.overrides`: `deepmerge-ts` 8.0.0 y `mysql2` 3.22.0.
 
 ## Decisión
 Las opciones elegidas en la tabla. Detalle de uso en `specs/features/002-fundaciones/diseno.md`.

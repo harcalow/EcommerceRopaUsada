@@ -62,7 +62,9 @@ Etapas: `base` (node:24-alpine, pnpm vía corepack) → `pruned` (`turbo prune <
 - `prod`: usuario `node`, `NODE_ENV=production`, solo artefactos necesarios, `HEALTHCHECK`.
 - La web necesita `output: 'standalone'` en `next.config` para `prod`.
 - `.dockerignore` excluye `node_modules`, `dist`, `.next`, `.turbo`, entorno (salvo el ejemplo), `.git`, `specs`, `.claude`.
-- Estado: plantillas sin probar; se validan al generar las apps (base técnica de la 001).
+- Estado: validados con las apps reales (T-14 de la 001). Imágenes base fijadas (`node:24.21.0-alpine3.23`); pnpm 10.34.7 vía corepack; `turbo@2.11.5`.
+- `dev`: el repo se monta en `/app` y cada `node_modules` va en un volumen con nombre (`*-nm-*`; si se añade un paquete al workspace, añadirlo al servicio en compose); `.next` de la web en el volumen `web-next`; sondeo de archivos activado (WSL/Windows). Tras cambiar dependencias: bajar el perfil y borrar los volúmenes `*-nm-*`.
+- Base de pruebas E2E: `perchados_e2e` la crea `docker/postgres/init/01-e2e-database.sql` (solo con volumen vacío; en uno existente: `docker exec perchados-postgres-1 psql -U perchados -d perchados -f /docker-entrypoint-initdb.d/01-e2e-database.sql`). Migrar: `DATABASE_URL=postgresql://<usuario>:<clave>@localhost:5432/perchados_e2e pnpm --filter @perchados/api db:migrate:deploy`.
 
 ```dockerfile
 # ❌ imagen sin fijar, root, copia todo

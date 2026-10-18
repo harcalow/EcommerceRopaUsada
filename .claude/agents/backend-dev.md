@@ -8,6 +8,8 @@ skills:
   - memoria-engram
   - requisitos-plataforma
   - nestjs-hexagonal
+  - api-rest-conventions
+  - prisma-datos
   - docker-dev
 ---
 
