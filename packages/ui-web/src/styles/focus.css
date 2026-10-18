@@ -1,0 +1,12 @@
+/* Foco global (WCAG 2.4.7 y 2.4.13): anillo de 2 px con el token `focus`, ≥ 3:1 sobre los fondos de la marca */
+:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+/* En modo de alto contraste el navegador sustituye los colores; se mantiene el anillo con un color de sistema */
+@media (forced-colors: active) {
+  :focus-visible {
+    outline: 2px solid CanvasText;
+  }
+}

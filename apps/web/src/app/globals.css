@@ -1,0 +1,17 @@
+/*
+ * next/font publica las fuentes autoalojadas en --font-plus-jakarta y --font-ibm-plex-mono (con su
+ * fallback de métricas ajustadas). Aquí se enlazan con los tokens --font-sans y --font-mono de
+ * ui-tokens; `html[lang]` (0,1,1) gana a `:root` (0,1,0) de tokens.css sin depender del orden.
+ */
+html[lang] {
+  --font-sans: var(--font-plus-jakarta), 'Plus Jakarta Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-mono: var(--font-ibm-plex-mono), 'IBM Plex Mono', ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-sans);
+  font-size: var(--font-size-md);
+  color: var(--color-ink);
+  background-color: var(--color-surface);
+}
