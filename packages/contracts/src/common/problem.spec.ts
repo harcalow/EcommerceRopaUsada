@@ -47,9 +47,9 @@ describe('problemSchema (RT-005)', () => {
 });
 
 describe('PROBLEM_TYPES', () => {
-  it('contiene los 13 tipos del catálogo sin duplicados', () => {
-    expect(PROBLEM_TYPE_VALUES).toHaveLength(13);
-    expect(new Set(PROBLEM_TYPE_VALUES).size).toBe(13);
+  it('contiene los 14 tipos del catálogo sin duplicados', () => {
+    expect(PROBLEM_TYPE_VALUES).toHaveLength(14);
+    expect(new Set(PROBLEM_TYPE_VALUES).size).toBe(14);
     expect(PROBLEM_TYPES.accountLocked).toBe('auth/account-locked');
     expect(PROBLEM_TYPES.healthUnavailable).toBe('health/unavailable');
   });

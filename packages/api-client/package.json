@@ -25,15 +25,23 @@
     "build": "tsup",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run --coverage"
+    "test": "vitest run --coverage",
+    "contract:generate": "tsx scripts/generate-client.ts",
+    "contract:check": "tsx scripts/contract-check.ts"
   },
   "devDependencies": {
     "@perchados/config": "workspace:*",
     "@types/node": "24.19.0",
     "@vitest/coverage-v8": "5.0.1",
     "eslint": "9.39.5",
+    "openapi-typescript": "7.13.0",
     "tsup": "8.5.1",
+    "tsx": "4.23.15",
     "typescript": "6.0.3",
     "vitest": "5.0.1"
+  },
+  "dependencies": {
+    "@perchados/contracts": "workspace:*",
+    "openapi-fetch": "0.17.0"
   }
 }

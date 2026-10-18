@@ -42,3 +42,6 @@ Thumbs.db
 
 # Docker local
 docker-compose.override.yml
+
+# Cliente generado de Prisma (se regenera con `pnpm db:generate`)
+apps/api/src/shared/database/generated/

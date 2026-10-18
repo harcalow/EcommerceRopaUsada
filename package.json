@@ -18,6 +18,8 @@
     "contract:generate": "turbo run contract:generate",
     "contract:check": "turbo run contract:check",
     "test:e2e": "turbo run test:e2e",
+    "test:scripts": "node --test \"scripts/ci/*.test.mjs\"",
+    "ci:migrations": "node scripts/ci/check-migrations-immutable.mjs",
     "infra:up": "docker compose up -d",
     "infra:down": "docker compose down"
   },
@@ -25,5 +27,16 @@
     "@perchados/config": "workspace:*",
     "turbo": "2.11.5",
     "typescript": "6.0.3"
+  },
+  "pnpm": {
+    "overrides": {
+      "deepmerge-ts": "8.0.0",
+      "mysql2": "3.22.0"
+    },
+    "auditConfig": {
+      "ignoreGhsas": [
+        "GHSA-vfj7-8cjw-p6xm"
+      ]
+    }
   }
 }

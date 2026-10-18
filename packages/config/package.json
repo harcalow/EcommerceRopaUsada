@@ -6,7 +6,8 @@
   "exports": {
     "./tsconfig/*": "./tsconfig/*",
     "./eslint": "./eslint/base.js",
-    "./vitest": "./vitest/base.ts"
+    "./vitest": "./vitest/base.ts",
+    "./stylelint": "./stylelint/base.js"
   },
   "scripts": {
     "lint": "eslint .",
@@ -18,6 +19,8 @@
     "@vitest/coverage-v8": "5.0.1",
     "eslint": "9.39.5",
     "globals": "17.12.0",
+    "stylelint": "17.15.0",
+    "stylelint-declaration-strict-value": "1.12.1",
     "typescript-eslint": "8.70.1",
     "vite": "7.3.6",
     "vitest": "5.0.1"

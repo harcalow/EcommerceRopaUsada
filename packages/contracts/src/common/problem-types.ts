@@ -8,6 +8,7 @@ export const PROBLEM_TYPES = {
   csrfInvalid: 'auth/csrf-invalid',
   notFound: 'not-found',
   payloadTooLarge: 'payload-too-large',
+  requestRejected: 'request-rejected',
   accountLocked: 'auth/account-locked',
   rateLimitExceeded: 'rate-limit-exceeded',
   internalError: 'internal-error',

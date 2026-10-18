@@ -2,6 +2,7 @@
   "extends": "@perchados/config/tsconfig/library.json",
   "include": [
     "src",
+    "scripts",
     "*.config.ts"
   ]
 }

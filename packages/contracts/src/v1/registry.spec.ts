@@ -40,3 +40,19 @@ describe('buildOpenApiDocument (RT-004, RT-016)', () => {
     expect(committed).toEqual(JSON.parse(JSON.stringify(document)));
   });
 });
+
+describe('rutas auth (RF-001, RF-012, RT-004)', () => {
+  const document = buildOpenApiDocument();
+  const statuses = (path: string, method: 'get' | 'post'): string[] =>
+    Object.keys(document.paths[path]?.[method]?.responses ?? {}).sort();
+
+  it('declara login con sus respuestas', () => {
+    expect(statuses('/v1/auth/login', 'post')).toEqual(['200', '400', '401', '403', '423', '429']);
+    expect(JSON.stringify(document.paths['/v1/auth/login']?.post)).toContain('#/components/schemas/LoginRequest');
+  });
+
+  it('declara session y logout con sus respuestas', () => {
+    expect(statuses('/v1/auth/session', 'get')).toEqual(['200', '401']);
+    expect(statuses('/v1/auth/logout', 'post')).toEqual(['204', '403', '429']);
+  });
+});

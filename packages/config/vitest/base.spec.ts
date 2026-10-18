@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { COVERAGE_EXCLUDE, COVERAGE_LINES_THRESHOLD, createVitestConfig } from './base.ts';
+import { COVERAGE_EXCLUDE, COVERAGE_LINES_THRESHOLD, TEST_TIMEOUT_MS, createVitestConfig } from './base.ts';
 
 describe('createVitestConfig (RT-003)', () => {
   it('exige al menos 80 % de cobertura de líneas con el proveedor v8', () => {
@@ -38,5 +38,30 @@ describe('createVitestConfig (RT-003)', () => {
 
     expect(config.test?.testTimeout).toBe(1234);
     expect(config.test?.coverage?.thresholds).toEqual({ lines: 80 });
+  });
+});
+
+describe('tiempos de espera', () => {
+  it('sube testTimeout y hookTimeout a 15 s por defecto', () => {
+    const test = createVitestConfig().test;
+
+    expect(TEST_TIMEOUT_MS).toBe(15_000);
+    expect(test?.testTimeout).toBe(15_000);
+    expect(test?.hookTimeout).toBe(15_000);
+  });
+
+  it('permite que un paquete sobrescriba hookTimeout', () => {
+    const test = createVitestConfig({ test: { hookTimeout: 60_000 } }).test;
+
+    expect(test?.hookTimeout).toBe(60_000);
+    expect(test?.testTimeout).toBe(15_000);
+  });
+});
+
+describe('informe de cobertura', () => {
+  it('lista todos los archivos medidos, también los cubiertos al 100 %', () => {
+    const reporter = createVitestConfig().test?.coverage?.reporter;
+
+    expect(reporter).toEqual([['text', { skipFull: false }], 'lcov']);
   });
 });

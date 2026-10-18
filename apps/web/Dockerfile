@@ -1,15 +1,17 @@
-# Plantilla multi-stage (ADR-003). Paquete esperado: @perchados/web.
-# Contexto de build: la raíz del monorepo. Se validará al generar la app (spec 002).
-# La etapa prod requiere output: 'standalone' en next.config (se fija al generar la web).
+# Dockerfile multi-stage de la web (ADR-003). Paquete: @perchados/web.
+# Contexto de build: la raíz del monorepo. Etapas: base, pruned, deps, dev, build, prod.
+# La etapa prod usa output: 'standalone' (next.config.ts).
 
-FROM node:24-alpine AS base
+FROM node:24.21.0-alpine3.23 AS base
 ENV PNPM_HOME=/pnpm
 ENV PATH=$PNPM_HOME:$PATH
-RUN corepack enable
+ENV TURBO_TELEMETRY_DISABLED=1
+ENV NEXT_TELEMETRY_DISABLED=1
+RUN corepack enable && corepack prepare pnpm@10.34.7 --activate
 WORKDIR /app
 
 FROM base AS pruned
-RUN pnpm add -g turbo
+RUN npm install --global turbo@2.11.5
 COPY . .
 RUN turbo prune @perchados/web --docker
 
@@ -18,16 +20,21 @@ COPY --from=pruned /app/out/json/ .
 COPY --from=pruned /app/out/pnpm-lock.yaml ./pnpm-lock.yaml
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile
 
+# Desarrollo (compose, target: dev): el código se monta desde el host y el comando
+# compila los paquetes del workspace y arranca next dev.
 FROM deps AS dev
 ENV NODE_ENV=development
 COPY --from=pruned /app/out/full/ .
+# turbo prune no incluye los archivos de la raíz que extienden los tsconfig
+COPY --from=pruned /app/tsconfig.base.json ./tsconfig.base.json
 EXPOSE 3000
-CMD ["pnpm", "--filter", "@perchados/web", "dev"]
+CMD ["sh", "-c", "pnpm exec turbo run build --filter=@perchados/web^... && pnpm --filter @perchados/web dev"]
 
 FROM dev AS build
-RUN pnpm turbo run build --filter=@perchados/web
+ENV NODE_ENV=production
+RUN pnpm exec turbo run build --filter=@perchados/web
 
-FROM node:24-alpine AS prod
+FROM node:24.21.0-alpine3.23 AS prod
 ENV NODE_ENV=production
 ENV PORT=3000
 ENV HOSTNAME=0.0.0.0
@@ -39,5 +46,5 @@ COPY --from=build --chown=node:node /app/apps/web/public ./apps/web/public
 USER node
 EXPOSE 3000
 HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=3 \
-  CMD wget -q -O /dev/null http://localhost:3000/ || exit 1
+  CMD wget -q -O /dev/null http://127.0.0.1:3000/healthz || exit 1
 CMD ["node", "apps/web/server.js"]
