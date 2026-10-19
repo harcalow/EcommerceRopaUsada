@@ -1,7 +1,7 @@
----[x] |[x] |[x] |
+---
 id: 001
 diseno: ./diseno.md
-estado: pendiente # pendiente | en-curso | completada  (no requiere aprobación humana)
+estado: completada # pendiente | en-curso | completada  (no requiere aprobación humana); cerrada en /archivar 001 (2026-10-18)
 ---
 
 # Tareas 001 — Login de administrador (incluye la base técnica)
@@ -394,7 +394,7 @@ Todas las pruebas nuevas se nombran con `RT-022` (o `ADR-012` en T-50). Context7
 - **Archivos previstos:** `apps/web/src/shared/api/{server-client.ts, server-client.test.ts}`; actualización de su entrada en `specs/02-memoria/registro-componentes.md`.
 - **Cómo se verifica por sí sola:**
   - Unitarias (con `fetch` simulado): una petición entrante con `X-Forwarded-For` falso no lo reenvía nunca; con IP resuelta envía `X-Perchados-Internal-Token` y `X-Perchados-Client-Ip`; sin IP resuelta envía solo el token; sigue reenviando `Cookie` y `X-Correlation-Id` válido.
-  - El secreto no llega al navegador: tras `pnpm --filter web build` con un secreto marcador, el marcador no aparece en los archivos estáticos del cliente (comprobación por script, anotada en el PR).
+  - El secreto no llega al navegador: tras `pnpm --filter web build` con un secreto marcador, el marcador no aparece en los archivos estáticos del cliente (comprobación por script, anotada en el PR). **Nota de cierre (2026-10-18):** la comprobación por bundle no se ejecutó como script; se sustituyó por `apps/web/src/shared/api/server-secret-boundary.test.ts`, que verifica la misma frontera.
   - `pnpm test:e2e` sigue en verde (login y panel por SSR con `WEB_TRUST_PROXY_HOPS=0`).
 
 #### T-50 — Lint de `@perchados/contracts/client` (ADR-012)

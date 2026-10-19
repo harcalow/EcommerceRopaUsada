@@ -2,7 +2,7 @@
 id: 001
 titulo: Login de administrador
 tipo: vertical        # horizontal (base técnica) | vertical (valor para el usuario)
-estado: aprobada      # borrador → aprobada (solo tú) → cumplida
+estado: cumplida      # borrador → aprobada (solo tú) → cumplida
 aprobacion: dueño (Harold) el 2026-10-15; reaprobada el mismo día tras quitar las referencias a 000 y 002 (sin cambios de RF, CA, CB ni RNF)
 autor: analista-specs
 plataforma: web       # panel de administración solo en la web (responsive)

@@ -1,7 +1,7 @@
 ---
 id: 001
 spec: ./spec.md
-estado: aprobada # borrador | aprobada | cumplida — reaprobada por el dueño (Harold) el 2026-10-18 en el chat tras los hallazgos de la etapa 6 (ADR-011, ADR-012, t=10)
+estado: cumplida # borrador | aprobada | cumplida — aprobada por el dueño (Harold) el 2026-10-18 tras los hallazgos de la etapa 6 (ADR-011, ADR-012); cumplida en /archivar 001 (2026-10-18)
 autor: arquitecto
 adr: [ADR-001, ADR-003, ADR-006, ADR-007, ADR-008, ADR-009, ADR-010, ADR-011, ADR-012]
 ---
