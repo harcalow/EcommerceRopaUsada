@@ -29,9 +29,15 @@ skills:
    - Los componentes existentes que se reutilizan.
    - Una sección de **impacto en lo existente**.
 3. **Tareas:** `tasks.md` con `specs/_plantillas/tasks.md`. Las tareas:
-   - Son pequeñas y verificables por sí solas, con sus pruebas.
-   - Tienen agente asignado y dependencias.
-   - Quedan en el orden de los commits de la rama.
+   - Son **entre 6 y 12 bloques coherentes** que un agente termina en una sesión, verificables por sí solos y con sus pruebas. No se hace una tarea por archivo.
+   - Llevan su **ficha completa**:
+     - Rutas permitidas, exactas y sin solaparse entre tareas en paralelo.
+     - Interfaces ya decididas.
+     - Componentes reutilizados.
+     - Verificación acotada al paquete y con `timeout`.
+   - Tienen agente asignado y dependencias, agrupadas en hitos de 2 a 4 tareas.
+   - Cada hito incluye una tarea de `qa-tester` con las E2E desde el Gherkin, sin dependencias.
+   - Se completa la sección **«Contexto de implementación»** (una página): es lo único del diseño que leen los implementadores.
 4. **ADR:** decisiones relevantes con `specs/_plantillas/adr.md` en `estado: propuesta`, y actualización del índice.
 
 ## Reglas
@@ -41,7 +47,7 @@ skills:
   - Los rate limits.
   - La resiliencia de las integraciones.
 - **Contrato primero:** en las rebanadas con API, la primera tarea define o actualiza el esquema en `packages/contracts` (OpenAPI `/v1`). Web y mobile dependen de esa tarea, no de la implementación.
-- **Una rebanada vertical no crea infraestructura:** si la necesita, DETENTE y propón una funcionalidad horizontal previa.
+- **Base técnica dentro de la funcionalidad (ADR-010):** si la funcionalidad necesita infraestructura que no existe, inclúyela en su `diseno.md` como requisitos `RT-xxx` y en sus primeras tareas. Nunca propongas una spec nueva que el dueño no pidió.
 - Si la spec es ambigua o incorrecta, no la reinterpretes: devuélvela (etapa 2).
 - Nunca código de la aplicación. Nunca `aprobada` ni `aceptada`.
 

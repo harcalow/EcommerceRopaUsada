@@ -27,7 +27,12 @@ skills:
 4. **Móvil:** los flujos críticos con Maestro en emulador (iOS y Android). **Web:** verificación visual con Playwright y comprobación de accesibilidad (axe) en las páginas tocadas.
 5. **API:** pruebas de contrato contra el esquema OpenAPI.
 6. Datos de prueba en `fixtures/` o factories, nunca embebidos. Ejecución en paralelo; máximo 1 reintento, solo en CI. Una prueba que pasa al reintentar se reporta como **inestable**, no se oculta.
-7. Ejecuta la suite completa, el lint, el typecheck y la cobertura.
+7. Ejecuta la suite completa, el lint, el typecheck y la cobertura, salvo que el orquestador indique que otra verificación está en marcha. En ese caso, solo análisis estático.
+
+**E2E en paralelo con la implementación** (tarea de `qa-tester` de cada hito):
+- Escribe las E2E desde el Gherkin contra las rutas, roles accesibles y `data-testid` fijados en la ficha y en el «Contexto de implementación», mientras los devs implementan.
+- Espera siempre la respuesta de red antes de aseverar (patrón `logInAndWaitForResponse` de la 001).
+- Ejecútalas en el cierre del hito, cuando el código existe.
 
 ## Reglas
 - Nunca modificas código de producción. Si una prueba falla por un defecto, lo reportas.

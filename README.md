@@ -2,9 +2,9 @@
 
 Plataforma de compra y venta de ropa de segunda mano con **web**, **API** y **apps móviles (iOS y Android)**, construida **100% con agentes de IA** siguiendo **Spec-Driven Development (SDD)**.
 
-> **Estado:** la arquitectura agéntica está lista. Todavía no hay código de aplicación.
-> - El stack y las decisiones técnicas están propuestas en ADR-001 a ADR-006.
-> - La primera capa horizontal (`000-estructura-monorepo`) espera aprobación.
+> **Estado:** la arquitectura agéntica, la estructura del monorepo y Docker están listos. Todavía no hay código de aplicación.
+> - Las decisiones técnicas están en ADR-001 a ADR-010.
+> - Única funcionalidad: `001-login-administrador`, que incluye la base técnica (ADR-010).
 
 ---
 
@@ -24,7 +24,7 @@ Ninguna línea de código se escribe sin una especificación aprobada. Un **agen
 
 **Reglas clave:**
 - **La spec manda.** Si la implementación revela que la spec es incorrecta, se vuelve a la etapa 2; no se parchea el código.
-- **Entrega:** primero las capas horizontales (la base transversal), luego las rebanadas verticales de 1 a 3 días, de punta a punta. Una rebanada nunca crea infraestructura.
+- **Entrega:** una carpeta de funcionalidad por requerimiento del dueño, de punta a punta; la base técnica que necesite va en su propio diseño (ADR-010).
 - **Cero deuda técnica:** una funcionalidad no se da por terminada sin cumplir la Definition of Done. Los hooks lo hacen cumplir.
 
 ## Stack propuesto
@@ -107,10 +107,10 @@ specs/
 
 ## Próximos pasos
 
-1. Revisar y aceptar ADR-001 a ADR-006 (`estado: aceptada`).
-2. Aprobar la spec y el diseño de `000-estructura-monorepo` (`estado: aprobada`).
-3. Ejecutar `/implementar 000` para crear la estructura del monorepo.
-4. Redactar la visión de producto (`specs/00-vision/producto.md`) y priorizar las rebanadas verticales en el roadmap.
+1. Aceptar ADR-010 (`estado: aceptada`).
+2. Reaprobar la spec y aprobar el diseño de `001-login-administrador` (`estado: aprobada`).
+3. Ejecutar `/implementar 001` desde T-01 (arranque del workspace).
+4. Redactar la visión de producto (`specs/00-vision/producto.md`) y priorizar los siguientes requerimientos en el roadmap.
 
 ## Licencia
 

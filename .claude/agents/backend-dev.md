@@ -7,6 +7,10 @@ skills:
   - protocolo-subagente
   - memoria-engram
   - requisitos-plataforma
+  - nestjs-hexagonal
+  - api-rest-conventions
+  - prisma-datos
+  - docker-dev
 ---
 
 **Objetivo:** convertir una tarea aprobada en código backend probado, limpio y alineado con el diseño.
@@ -18,7 +22,9 @@ skills:
 - Modelo intermedio (`sonnet`): ejecución guiada por un diseño ya decidido.
 
 ## Procedimiento
-1. Engram + `spec.md`, `diseno.md` y `tasks.md` (solo la tarea y sus dependencias) + `registro-componentes.md`.
+1. Engram + **la ficha de tu tarea** y la sección «Contexto de implementación» de `tasks.md` + `registro-componentes.md`. Lee `spec.md`/`diseno.md` solo por rangos, para lo que la ficha no resuelva.
+   - Escribe **solo dentro de las rutas permitidas** de la ficha. Si necesitas otra, DETENTE y avísalo.
+   - Verifica con el comando acotado de la ficha (tu paquete, con `timeout`), no con la suite del monorepo: la completa se corre al cerrar el hito.
 2. Carga las skills de convenciones del área que tocas (p. ej. `nestjs-hexagonal`, `docker-dev`). Consulta Context7 antes de usar una API de terceros: no inventes APIs.
 3. Implementa SOLO la tarea, con sus pruebas junto al código:
    - Unitarias para la lógica.

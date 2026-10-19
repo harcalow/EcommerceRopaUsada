@@ -1,0 +1,193 @@
+# Infraestructura de desarrollo (ADR-003). Variables: ver .env.example.
+# Solo infraestructura:  docker compose up -d
+# Con aplicaciones:      docker compose --profile apps up -d --build
+#
+# Perfil apps (desarrollo): el repositorio se monta en /app y cada node_modules vive en un volumen
+# con nombre (los enlaces de pnpm del host no sirven en Linux). Los volúmenes se rellenan una sola
+# vez, con la imagen: tras cambiar dependencias, `docker compose --profile apps down` y borrar
+# los volúmenes *-nm-* (docker volume ls) antes de reconstruir. Si se añade un paquete al
+# workspace, hay que añadir su node_modules a la lista de volúmenes del servicio.
+
+name: perchados
+
+services:
+  postgres:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    ports:
+      - "127.0.0.1:${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./docker/postgres/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    restart: unless-stopped
+
+  # Emulador S3: SeaweedFS (Apache-2.0). MinIO CE ya no publica imágenes (ADR-003).
+  storage:
+    image: chrislusf/seaweedfs:4.48
+    command: >
+      server -dir=/data -ip.bind=0.0.0.0 -master.volumeSizeLimitMB=256
+      -s3 -s3.port=9000
+    environment:
+      AWS_ACCESS_KEY_ID: ${STORAGE_ACCESS_KEY}
+      AWS_SECRET_ACCESS_KEY: ${STORAGE_SECRET_KEY}
+    ports:
+      - "127.0.0.1:${STORAGE_API_PORT:-9000}:9000"
+      - "127.0.0.1:${STORAGE_CONSOLE_PORT:-9001}:8888"
+    volumes:
+      - storage-data:/data
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O /dev/null http://localhost:9333/cluster/status && wget -q -O /dev/null http://localhost:8888/ || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 15s
+    restart: unless-stopped
+
+  # Tarea de un solo uso: crea el bucket si no existe y termina.
+  storage-init:
+    image: chrislusf/seaweedfs:4.48
+    depends_on:
+      storage:
+        condition: service_healthy
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - echo "s3.bucket.create -name $${STORAGE_BUCKET}" | weed shell -master=storage:9333
+    environment:
+      STORAGE_BUCKET: ${STORAGE_BUCKET}
+    restart: "no"
+
+  mailpit:
+    image: axllent/mailpit:v1.27
+    ports:
+      - "127.0.0.1:${MAILPIT_SMTP_PORT:-1025}:1025"
+      - "127.0.0.1:${MAILPIT_UI_PORT:-8025}:8025"
+    volumes:
+      - mailpit-data:/data
+    environment:
+      MP_DATABASE: /data/mailpit.db
+    healthcheck:
+      test: ["CMD", "/mailpit", "readyz"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  api:
+    profiles: ["apps"]
+    init: true
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+      target: dev
+    environment:
+      NODE_ENV: development
+      APP_ENV: ${APP_ENV:-development}
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+      API_PORT: 3001
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-http://localhost:${WEB_PORT:-3000}}
+      TRUST_PROXY: ${TRUST_PROXY:-false}
+      INTERNAL_API_SECRET: ${INTERNAL_API_SECRET:?INTERNAL_API_SECRET es obligatoria (openssl rand -base64 32; mismo valor en api y web)}
+      BODY_LIMIT_KB: ${BODY_LIMIT_KB:-100}
+      SESSION_TTL_HOURS: ${SESSION_TTL_HOURS:-8}
+      SESSION_COOKIE_DOMAIN: ${SESSION_COOKIE_DOMAIN:-}
+      RATE_LIMIT_GLOBAL_PER_MIN: ${RATE_LIMIT_GLOBAL_PER_MIN:-100}
+      RATE_LIMIT_AUTH_PER_MIN: ${RATE_LIMIT_AUTH_PER_MIN:-10}
+      PASSWORD_HASH_MEMORY_KIB: ${PASSWORD_HASH_MEMORY_KIB:-19456}
+      PASSWORD_HASH_ITERATIONS: ${PASSWORD_HASH_ITERATIONS:-10}
+      PASSWORD_HASH_PARALLELISM: ${PASSWORD_HASH_PARALLELISM:-1}
+      HEALTH_DB_TIMEOUT_MS: ${HEALTH_DB_TIMEOUT_MS:-2000}
+      ADMIN_INITIAL_PASSWORD: ${ADMIN_INITIAL_PASSWORD:-}
+      ADMIN_CONTACT_EMAIL: ${ADMIN_CONTACT_EMAIL:-}
+      # Sondeo de archivos: el montaje desde Windows/WSL no emite eventos de cambio
+      TSC_WATCHFILE: PriorityPollingInterval
+      TSC_WATCHDIRECTORY: DynamicPriorityPolling
+      CHOKIDAR_USEPOLLING: "true"
+    ports:
+      - "127.0.0.1:${API_PORT:-3001}:3001"
+    volumes:
+      - .:/app
+      - api-nm-root:/app/node_modules
+      - api-nm-api:/app/apps/api/node_modules
+      - api-nm-contracts:/app/packages/contracts/node_modules
+      - api-nm-config:/app/packages/config/node_modules
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O /dev/null http://127.0.0.1:3001/v1/health || exit 1"]
+      interval: 10s
+      timeout: 10s
+      retries: 12
+      start_period: 180s
+    restart: unless-stopped
+
+  web:
+    profiles: ["apps"]
+    init: true
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+      target: dev
+    environment:
+      NODE_ENV: development
+      APP_ENV: ${APP_ENV:-development}
+      WEB_PORT: 3000
+      API_INTERNAL_URL: http://api:3001
+      API_PUBLIC_URL: http://localhost:${API_PORT:-3001}
+      INTERNAL_API_SECRET: ${INTERNAL_API_SECRET:?INTERNAL_API_SECRET es obligatoria (openssl rand -base64 32; mismo valor en api y web)}
+      WEB_TRUST_PROXY_HOPS: ${WEB_TRUST_PROXY_HOPS:-0}
+      # Correo de contacto obligatorio para la web; el valor por defecto solo sirve en desarrollo
+      ADMIN_CONTACT_EMAIL: ${ADMIN_CONTACT_EMAIL:-admin@perchados.local}
+      # Sondeo de archivos: el montaje desde Windows/WSL no emite eventos de cambio
+      WATCHPACK_POLLING: "true"
+      CHOKIDAR_USEPOLLING: "true"
+    ports:
+      - "127.0.0.1:${WEB_PORT:-3000}:3000"
+    volumes:
+      - .:/app
+      - web-nm-root:/app/node_modules
+      - web-nm-web:/app/apps/web/node_modules
+      - web-nm-contracts:/app/packages/contracts/node_modules
+      - web-nm-api-client:/app/packages/api-client/node_modules
+      - web-nm-config:/app/packages/config/node_modules
+      - web-nm-ui-tokens:/app/packages/ui-tokens/node_modules
+      - web-nm-ui-web:/app/packages/ui-web/node_modules
+      # Caché y salida de next dev fuera del montaje del host (el disco compartido es muy lento)
+      - web-next:/app/apps/web/.next
+    depends_on:
+      api:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O /dev/null http://127.0.0.1:3000/healthz || exit 1"]
+      interval: 10s
+      timeout: 10s
+      retries: 12
+      start_period: 180s
+    restart: unless-stopped
+
+volumes:
+  postgres-data:
+  storage-data:
+  mailpit-data:
+  api-nm-root:
+  api-nm-api:
+  api-nm-contracts:
+  api-nm-config:
+  web-nm-root:
+  web-nm-web:
+  web-nm-contracts:
+  web-nm-api-client:
+  web-nm-config:
+  web-nm-ui-tokens:
+  web-nm-ui-web:
+  web-next:

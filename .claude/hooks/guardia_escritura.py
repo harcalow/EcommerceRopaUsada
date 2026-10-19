@@ -21,7 +21,7 @@ import sys
 import _comun as c
 
 APROBADOS = {"aprobada", "aceptada"}
-SECRETOS = re.compile(r"(^|/)(\.env(\..*)?|secrets/.*|.*\.(pem|key))$")
+SECRETOS = re.compile(r"(^|/)(\.env(?!\.example$)(\..*)?|secrets/.*|.*\.(pem|key))$")
 DOCUMENTACION = ("specs/", ".claude/", "CLAUDE.md", "README.md", ".mcp.json", ".gitignore")
 GOBIERNO = ("CLAUDE.md", "specs/_plantillas/", ".claude/settings.json", ".claude/hooks/", ".mcp.json")
 REGISTRO = "specs/02-memoria/registro-componentes.md"
@@ -30,7 +30,7 @@ PRUEBA = re.compile(r"(\.(test|spec|e2e)\.[cm]?[jt]sx?$|(^|/)(tests?|__tests__|e
 
 
 def implementador(rel):
-    if rel == REGISTRO or TASKS.match(rel) or rel.startswith(".claude/skills/"):
+    if rel in (REGISTRO, ".gitignore") or TASKS.match(rel) or rel.startswith(".claude/skills/"):
         return True
     return not rel.startswith(DOCUMENTACION)
 

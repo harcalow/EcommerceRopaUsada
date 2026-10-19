@@ -1,0 +1,273 @@
+# Integración continua (ADR-008). Se ejecuta también en PR que solo tocan `specs/` (sin paths-ignore).
+# El job `e2e` (T-42) depende de `calidad` y arranca la API y la web con APP_ENV=ci (cookie de sesión `Secure`).
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.head_ref || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  TURBO_TELEMETRY_DISABLED: "1"
+  NEXT_TELEMETRY_DISABLED: "1"
+
+jobs:
+  calidad:
+    name: calidad
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: perchados
+          POSTGRES_PASSWORD: perchados_ci
+          POSTGRES_DB: perchados
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U perchados -d perchados"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      DATABASE_URL: postgresql://perchados:perchados_ci@localhost:5432/perchados
+      TEST_DATABASE_URL: postgresql://perchados:perchados_ci@localhost:5432/perchados_test
+      APP_ENV: ci
+      ADMIN_CONTACT_EMAIL: admin@perchados.local
+      API_INTERNAL_URL: http://localhost:3001
+      API_PUBLIC_URL: http://localhost:3001
+    steps:
+      - name: Descargar el repositorio
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Preparar pnpm
+        uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
+
+      - name: Preparar Node
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+
+      - name: Restaurar la caché de Turborepo
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: .turbo
+          key: turbo-${{ runner.os }}-${{ github.sha }}
+          restore-keys: turbo-${{ runner.os }}-
+
+      - name: Generar el secreto interno de esta ejecución (RT-022)
+        run: |
+          secret="$(openssl rand -base64 32)"
+          echo "::add-mask::$secret"
+          echo "INTERNAL_API_SECRET=$secret" >> "$GITHUB_ENV"
+
+      - name: Instalar dependencias
+        run: pnpm install --frozen-lockfile
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Typecheck
+        run: pnpm typecheck
+
+      - name: Pruebas con cobertura
+        run: pnpm test
+
+      - name: Pruebas de los scripts de CI
+        run: pnpm test:scripts
+
+      - name: Build
+        run: pnpm build
+
+      - name: Verificar contrato
+        run: pnpm contract:check
+
+      - name: Migraciones inmutables
+        env:
+          BASE_SHA: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || github.event.before }}
+        run: pnpm ci:migrations --base "$BASE_SHA"
+
+      - name: Migraciones sobre BD vacía
+        env:
+          PGHOST: localhost
+          PGUSER: perchados
+          PGPASSWORD: perchados_ci
+          DATABASE_URL: postgresql://perchados:perchados_ci@localhost:5432/perchados_migraciones
+        run: |
+          psql --dbname perchados --command 'CREATE DATABASE perchados_migraciones'
+          pnpm db:migrate:deploy
+          pnpm db:migrate:deploy
+          pnpm --filter @perchados/api exec prisma migrate diff \
+            --from-config-datasource --to-schema prisma/schema.prisma --exit-code
+
+  seguridad:
+    name: seguridad
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    env:
+      GITLEAKS_VERSION: 8.30.1
+      GITLEAKS_SHA256: 551f6fc83ea457d62a0d98237cbad105af8d557003051f41f3e7ca7b3f2470eb
+    steps:
+      - name: Descargar el repositorio
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Instalar gitleaks
+        run: |
+          curl --fail --silent --show-error --location --retry 3 --max-time 120 \
+            --output gitleaks.tar.gz \
+            "https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}/gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz"
+          echo "${GITLEAKS_SHA256}  gitleaks.tar.gz" | sha256sum --check -
+          mkdir "$RUNNER_TEMP/gitleaks"
+          tar --extract --gzip --file gitleaks.tar.gz --directory "$RUNNER_TEMP/gitleaks" gitleaks
+          rm gitleaks.tar.gz
+          echo "$RUNNER_TEMP/gitleaks" >> "$GITHUB_PATH"
+
+      - name: Escanear secretos (gitleaks)
+        env:
+          RANGE_BASE: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || github.event.before }}
+          RANGE_HEAD: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
+        run: |
+          if [ -z "$RANGE_BASE" ] || [ "$RANGE_BASE" = "0000000000000000000000000000000000000000" ]; then
+            gitleaks git --redact --no-banner --verbose .
+          else
+            gitleaks git --redact --no-banner --verbose --log-opts "${RANGE_BASE}..${RANGE_HEAD}" .
+          fi
+
+      - name: Preparar pnpm
+        uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
+
+      - name: Preparar Node
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+
+      - name: Auditar dependencias
+        run: pnpm audit --audit-level high
+
+  e2e:
+    name: e2e
+    needs: calidad
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: perchados
+          POSTGRES_PASSWORD: perchados_ci
+          POSTGRES_DB: perchados
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U perchados -d perchados"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      # `CI` activa el reintento (máximo 1) de Playwright; E2E_WITH_API arranca la API desde apps/api/dist
+      CI: "true"
+      E2E_WITH_API: "1"
+      E2E_APP_ENV: ci
+      E2E_DATABASE_URL: postgresql://perchados:perchados_ci@localhost:5432/perchados_e2e
+      E2E_ADMIN_INITIAL_PASSWORD: E2e-initial-pass-2026!
+      ADMIN_CONTACT_EMAIL: admin@perchados.local
+      # `prisma generate` y `next build` leen la configuración del entorno
+      DATABASE_URL: postgresql://perchados:perchados_ci@localhost:5432/perchados
+      API_INTERNAL_URL: http://localhost:3101
+      API_PUBLIC_URL: http://localhost:3101
+    steps:
+      - name: Descargar el repositorio
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Preparar pnpm
+        uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
+
+      - name: Preparar Node
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+
+      - name: Restaurar la caché de Turborepo
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: .turbo
+          key: turbo-${{ runner.os }}-${{ github.sha }}
+          restore-keys: turbo-${{ runner.os }}-
+
+      - name: Generar el secreto interno de esta ejecución (RT-022)
+        run: |
+          secret="$(openssl rand -base64 32)"
+          echo "::add-mask::$secret"
+          echo "INTERNAL_API_SECRET=$secret" >> "$GITHUB_ENV"
+
+      - name: Instalar dependencias
+        run: pnpm install --frozen-lockfile
+
+      - name: Obtener la versión de Playwright
+        id: playwright
+        run: echo "version=$(pnpm --filter @perchados/web exec playwright --version | awk '{print $2}')" >> "$GITHUB_OUTPUT"
+
+      - name: Restaurar la caché de navegadores
+        id: browsers
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ steps.playwright.outputs.version }}
+
+      - name: Instalar Chromium con sus dependencias del sistema
+        if: steps.browsers.outputs.cache-hit != 'true'
+        run: pnpm --filter @perchados/web exec playwright install --with-deps chromium
+
+      - name: Instalar solo las dependencias del sistema de Chromium
+        if: steps.browsers.outputs.cache-hit == 'true'
+        run: pnpm --filter @perchados/web exec playwright install-deps chromium
+
+      - name: Crear y migrar la BD de E2E
+        env:
+          PGHOST: localhost
+          PGUSER: perchados
+          PGPASSWORD: perchados_ci
+        run: |
+          psql --dbname perchados --command 'CREATE DATABASE perchados_e2e'
+          DATABASE_URL="$E2E_DATABASE_URL" pnpm --filter @perchados/api db:migrate:deploy
+
+      - name: Pruebas E2E (build, API y web con APP_ENV=ci)
+        run: pnpm test:e2e
+
+      - name: Subir el informe HTML de Playwright
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: playwright-report
+          path: apps/web/playwright-report
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Subir las trazas de las pruebas fallidas
+        if: ${{ failure() }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: playwright-test-results
+          path: apps/web/test-results
+          if-no-files-found: ignore
+          retention-days: 7

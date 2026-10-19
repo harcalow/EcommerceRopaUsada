@@ -24,6 +24,15 @@ user-invocable: false
 - No invocas a otros subagentes ni propones cadenas: **el orquestador decide el siguiente paso**.
 - No sales de tu responsabilidad. Si la tarea la excede, detente y explica por qué.
 
+## 5. Reglas de ejecución
+Aprendidas en la retrospectiva de la 001; aplican a todo comando que lances.
+- **`timeout` en todo comando largo** (`timeout 600 pnpm …`); el comando que no termina se investiga, no se repite.
+- **Vitest siempre con `run`** (`vitest run`); nunca sin `run` ni en modo watch (`--watch`, `dev` de pruebas).
+- **Ningún servidor en primer plano** (`pnpm dev`, `next dev`, `nest start --watch`, `playwright --ui`): si una prueba lo necesita, lo levanta su propia configuración.
+- **No entregues con procesos vivos en segundo plano.** Antes de devolver el resultado, comprueba y detén lo que lanzaste: un proceso huérfano repitió ediciones y rompió el build.
+- **Dependencias con agentes en paralelo:** instalar o cambiar dependencias (`pnpm add`, `pnpm install`, lockfile) solo con el script de candado del proyecto; si no existe o no puedes obtener el candado, no toques las dependencias y avisa al orquestador.
+- **Cobertura en carpeta propia** si otro proceso usa la carpeta por defecto: `vitest run --coverage --coverage.reportsDirectory=<carpeta-propia>`.
+
 ## Formato de salida (obligatorio, corto)
 ```markdown
 ## Resumen

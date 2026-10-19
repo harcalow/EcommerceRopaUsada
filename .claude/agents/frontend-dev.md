@@ -7,6 +7,8 @@ skills:
   - protocolo-subagente
   - memoria-engram
   - requisitos-plataforma
+  - nextjs-app-router
+  - expo-router-mvvm
 ---
 
 **Objetivo:** convertir una tarea aprobada en interfaz probada, accesible y mobile-first, reutilizando el design system.
@@ -18,7 +20,9 @@ skills:
 - Modelo intermedio (`sonnet`): ejecución guiada por un diseño ya decidido.
 
 ## Procedimiento
-1. Engram + `spec.md`, `diseno.md` y `tasks.md` (solo la tarea y sus dependencias) + `registro-componentes.md`.
+1. Engram + **la ficha de tu tarea** y la sección «Contexto de implementación» de `tasks.md` + `registro-componentes.md`. Lee `spec.md`/`diseno.md` solo por rangos, para lo que la ficha no resuelva.
+   - Escribe **solo dentro de las rutas permitidas** de la ficha. Si necesitas otra, DETENTE y avísalo.
+   - Verifica con el comando acotado de la ficha (tu paquete, con `timeout`), no con la suite del monorepo: la completa se corre al cerrar el hito.
 2. Carga la skill de convenciones de la app (`nextjs-app-router` o `expo-router-mvvm`). Consulta Context7 antes de usar una API de terceros.
 3. Implementa SOLO la tarea, con pruebas de componentes y hooks junto al código.
 4. **Reutiliza antes de crear:** busca en el registro y en Engram. Si creas un componente reutilizable, regístralo y guárdalo en Engram (`componente/…`).

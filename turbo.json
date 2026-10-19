@@ -1,0 +1,109 @@
+{
+  "$schema": "https://turbo.build/schema.json",
+  "tasks": {
+    "dev": {
+      "cache": false,
+      "passThroughEnv": [
+        "API_PORT",
+        "WEB_PORT"
+      ],
+      "persistent": true
+    },
+    "build": {
+      "dependsOn": [
+        "^build",
+        "db:generate"
+      ],
+      "outputs": [
+        "dist/**",
+        "build/**",
+        ".next/**",
+        "!.next/cache/**"
+      ]
+    },
+    "test": {
+      "dependsOn": [
+        "^build",
+        "db:generate"
+      ],
+      "outputs": [
+        "coverage/**"
+      ],
+      "passThroughEnv": [
+        "DATABASE_URL",
+        "TEST_DATABASE_URL"
+      ]
+    },
+    "lint": {
+      "dependsOn": [
+        "^build",
+        "build",
+        "db:generate"
+      ]
+    },
+    "typecheck": {
+      "dependsOn": [
+        "^build",
+        "build",
+        "db:generate"
+      ]
+    },
+    "format": {
+      "cache": false
+    },
+    "contract:generate": {
+      "dependsOn": [
+        "^build",
+        "^contract:generate"
+      ],
+      "outputs": [
+        "openapi/**",
+        "src/generated/**"
+      ]
+    },
+    "contract:check": {
+      "dependsOn": [
+        "^build"
+      ]
+    },
+    "db:migrate": {
+      "cache": false,
+      "passThroughEnv": [
+        "DATABASE_URL"
+      ]
+    },
+    "db:migrate:deploy": {
+      "cache": false,
+      "passThroughEnv": [
+        "DATABASE_URL"
+      ]
+    },
+    "db:seed": {
+      "cache": false,
+      "dependsOn": [
+        "build"
+      ],
+      "passThroughEnv": [
+        "DATABASE_URL",
+        "LOG_LEVEL",
+        "ADMIN_INITIAL_PASSWORD"
+      ]
+    },
+    "test:e2e": {
+      "cache": false,
+      "dependsOn": [
+        "build"
+      ],
+      "passThroughEnv": [
+        "CI",
+        "E2E_*",
+        "ADMIN_CONTACT_EMAIL"
+      ]
+    },
+    "db:generate": {
+      "outputs": [
+        "src/shared/database/generated/**"
+      ]
+    }
+  }
+}

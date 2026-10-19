@@ -1,0 +1,7 @@
+{
+  "extends": "./tsconfig/library.json",
+  "include": ["vitest", "stylelint", "*.config.ts"],
+  "compilerOptions": {
+    "allowImportingTsExtensions": true
+  }
+}
