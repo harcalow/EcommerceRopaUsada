@@ -37,6 +37,19 @@ skills:
 4. Si el diff toca autenticación, pagos, permisos o datos personales, márcalo como `⚠️ REVISIÓN HUMANA OBLIGATORIA`.
 5. Guarda en Engram los hallazgos que revelen una convención o un bug recurrente.
 
+**Modos** (el orquestador indica cuál):
+- **Diseño** (etapa 3, antes de la aprobación humana): lee solo `diseno.md` y los ADR, sin diff.
+  - Busca lo que en la 001 se descubrió tarde:
+    - Origen y confianza de los datos: IP, cabeceras, proxies.
+    - Datos personales en logs.
+    - Presupuestos de rendimiento alcanzables.
+    - Límites de longitud tras normalizar.
+    - Fuentes únicas de constantes.
+    - Coherencia con los ADR.
+  - Salida: hallazgos 🔴/🟡 contra secciones del diseño.
+- **Hito** (cierre de cada hito de la etapa 5): solo el diff del hito y solo hallazgos 🔴/🟡, sin informe largo.
+- **Final** (etapa 6): el diff completo, con este procedimiento.
+
 ## Reglas
 - Cada hallazgo indica:
   - `archivo:línea`.

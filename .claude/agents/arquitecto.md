@@ -29,9 +29,15 @@ skills:
    - Los componentes existentes que se reutilizan.
    - Una sección de **impacto en lo existente**.
 3. **Tareas:** `tasks.md` con `specs/_plantillas/tasks.md`. Las tareas:
-   - Son pequeñas y verificables por sí solas, con sus pruebas.
-   - Tienen agente asignado y dependencias.
-   - Quedan en el orden de los commits de la rama.
+   - Son **entre 6 y 12 bloques coherentes** que un agente termina en una sesión, verificables por sí solos y con sus pruebas. No se hace una tarea por archivo.
+   - Llevan su **ficha completa**:
+     - Rutas permitidas, exactas y sin solaparse entre tareas en paralelo.
+     - Interfaces ya decididas.
+     - Componentes reutilizados.
+     - Verificación acotada al paquete y con `timeout`.
+   - Tienen agente asignado y dependencias, agrupadas en hitos de 2 a 4 tareas.
+   - Cada hito incluye una tarea de `qa-tester` con las E2E desde el Gherkin, sin dependencias.
+   - Se completa la sección **«Contexto de implementación»** (una página): es lo único del diseño que leen los implementadores.
 4. **ADR:** decisiones relevantes con `specs/_plantillas/adr.md` en `estado: propuesta`, y actualización del índice.
 
 ## Reglas

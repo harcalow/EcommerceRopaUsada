@@ -1,6 +1,6 @@
-# Retrospectiva de proceso — 001 Login de administrador (borrador)
+# Retrospectiva de proceso — 001 Login de administrador
 
-> Estado: **pendiente de revisar con el dueño al cerrar la 001** (etapa 7). Recogido el 2026-10-16 a petición del dueño, durante la etapa 5.
+> Estado: **decidida** (2026-10-18): el dueño aprobó aplicar todas las mejoras. Recogido el 2026-10-16 a petición del dueño, durante la etapa 5.
 
 ## Coste observado (aproximado)
 - ~29 h de reloj desde el arranque del entorno hasta la tarea T-25 (incluye esperas y bloqueos).
@@ -32,6 +32,29 @@
 | 7 | Registro de versiones aprobadas en Engram para no reverificar | Bajo-medio | Automático |
 | 8 | Reglas anti-bloqueo (`timeout`, nunca watch, sin servidores en primer plano) dentro de la skill `protocolo-subagente` | Bajo-medio | Orquestador |
 
-## Para la revisión final
-- Decidir qué mejoras se aplican antes de la siguiente funcionalidad.
-- Medir la siguiente funcionalidad (tiempo, tareas, agentes) para comparar: ya no carga con la base técnica.
+## Datos medidos (trazas `logs/agent/`, 15 al 18 de octubre de 2026)
+- **Agentes:** 80 lanzamientos y 33 correcciones enviadas a agentes en curso.
+- **Acciones:** unas 3.500, de las cuales unas 1.660 son comandos de terminal (verificación).
+- **Reescrituras:** `diseno.md` 26 veces y `tasks.md` 15 veces.
+- **Tareas:** 50, unas 35 de ellas de base técnica.
+
+## Decisión del dueño (2026-10-18) y cambios aplicados
+| Mejora | Aplicada en |
+|---|---|
+| Hook de pruebas solo en SubagentStop de los implementadores y del qa-tester, `--filter=...[HEAD]`, sin cobertura, con candado propio y sin solaparse con otra verificación | `.claude/hooks/pruebas_afectadas.py` |
+| Limpieza automática de candados huérfanos de Vitest | Ídem |
+| Ficha de tarea: rutas permitidas, interfaces, reutilización y verificación acotada | `specs/_plantillas/tasks.md`, `.claude/agents/{arquitecto,backend-dev,frontend-dev}.md` |
+| Tareas por bloque (6 a 12) y agrupadas en hitos | `.claude/skills/tareas`, plantilla |
+| «Contexto de implementación» de una página en `tasks.md` | Plantilla, arquitecto, devs |
+| Revisión previa del diseño por el revisor (modo diseño) | `.claude/skills/disenar`, `.claude/agents/revisor.md` |
+| E2E del qa-tester en paralelo con la implementación | `.claude/skills/implementar`, `.claude/agents/qa-tester.md` |
+| Verificación completa y pasada del revisor solo al cerrar cada hito | `.claude/skills/implementar`, `CLAUDE.md` |
+| Skill `preparar-entorno` | `.claude/skills/preparar-entorno` |
+| Reglas anti-bloqueo | Ya en `protocolo-subagente` § 5 |
+| Repo dentro de WSL y más recursos | Pendiente del dueño, guiado por el orquestador |
+
+## Medición de la siguiente funcionalidad
+Se medirá contra la 001: horas de reloj, tareas, lanzamientos de agentes, correcciones enviadas y reescrituras de `diseno.md`. Objetivos:
+- Entre 6 y 12 tareas.
+- Menos de 15 lanzamientos.
+- Ninguna vuelta de la etapa 6 a la 3.
